@@ -271,4 +271,10 @@ namespace light::rhi
     };    // Handle
 
     typedef Handle<Resource> ResourceHandle;
+
+    template<class T,class ... Args>
+    Handle<T> MakeHandle(Args&& ... args)
+    {
+        return Handle<T>(new T(std::forward<Args>(args)...));
+    }
 }

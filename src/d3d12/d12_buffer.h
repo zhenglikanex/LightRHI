@@ -5,12 +5,16 @@
 
 namespace light::rhi
 {
+	class D12Device;
+
 	class D12Buffer final : public Buffer
 	{
 	public:
-		Handle<ID3D12Resource> resource;
+		D12Buffer(D12Device* device,const BufferDesc& desc);
 
-		explicit D12Buffer(const BufferDesc& desc);
+		ID3D12Resource* GetNative() { return resource_.Get(); }
+
 	private:
+		Handle<ID3D12Resource> resource_;
 	};
 }

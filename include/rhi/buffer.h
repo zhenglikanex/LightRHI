@@ -9,19 +9,22 @@ namespace light::rhi
 {
 	struct BufferDesc
 	{
-		BufferType type = BufferType::kUnkown;
+		BufferType type = BufferType::kUnknown;
 		CpuAccess cpu_access = CpuAccess::kNone;
+		ResourceState initial_state;
 		
-		bool is_uav;
+		bool is_uav = false;
 		uint64_t byte = 0;
 
-		std::string debug_name;
+#ifdef _DEBUG
+		std::wstring debug_name;
+#endif
 	};
 
 	class Buffer : public Resource
 	{
 	public:
-		explicit Buffer(const BufferDesc desc)
+		explicit Buffer(const BufferDesc& desc)
 			: desc_(desc)
 		{
 			

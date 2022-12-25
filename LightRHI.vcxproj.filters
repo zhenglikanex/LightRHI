@@ -42,9 +42,48 @@
     <ClInclude Include="include\rhi\types.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\d3d12\d12_convert.h">
+      <Filter>头文件\d3d12</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rhi\command_list.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rhi\command_queue.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\d3d12\d12_command_queue.h">
+      <Filter>头文件\d3d12</Filter>
+    </ClInclude>
+    <ClInclude Include="src\d3d12\d12_command_list.h">
+      <Filter>头文件\d3d12</Filter>
+    </ClInclude>
+    <ClInclude Include="src\d3d12\d12_upload_buffer.h">
+      <Filter>头文件\d3d12</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rhi\thread_safe_queue.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\d3d12\d12_device.cpp">
+      <Filter>源文件\d3d12</Filter>
+    </ClCompile>
+    <ClCompile Include="src\d3d12\d12_buffer.cpp">
+      <Filter>源文件\d3d12</Filter>
+    </ClCompile>
+    <ClCompile Include="src\test.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\d3d12\command_queue.cpp">
+      <Filter>头文件\d3d12</Filter>
+    </ClCompile>
+    <ClCompile Include="src\d3d12\d12_command_list.cpp">
+      <Filter>源文件\d3d12</Filter>
+    </ClCompile>
+    <ClCompile Include="src\d3d12\d12_command_queue.cpp">
+      <Filter>源文件\d3d12</Filter>
+    </ClCompile>
+    <ClCompile Include="src\d3d12\d12_upload_buffer.cpp">
       <Filter>源文件\d3d12</Filter>
     </ClCompile>
   </ItemGroup>

@@ -6,6 +6,12 @@
 
 namespace light::rhi
 {
+#ifdef _DEBUG
+#define CHECK(cond,msg) if(!(cond)) { assert(!(msg)); }
+#else
+#define CHECK(cond,msg)
+#endif
+
     // boost::hash_combine
     template <class T>
     void HashCombine(size_t& seed, const T& v)
@@ -40,4 +46,6 @@ namespace light::rhi
     inline bool operator !(T a) { return uint32_t(a) == 0; } \
     inline bool operator ==(T a, uint32_t b) { return uint32_t(a) == b; } \
     inline bool operator !=(T a, uint32_t b) { return uint32_t(a) != b; }
+
+
 }

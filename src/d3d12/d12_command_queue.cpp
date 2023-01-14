@@ -17,12 +17,12 @@ namespace light::rhi
 		ThrowIfFailed(device_->GetNative()->CreateCommandQueue(&desc, IID_PPV_ARGS(&queue_)));
 	}
 
-	CommandListHandle D12CommandQueue::GetCommandList()
+	CommandList* D12CommandQueue::GetCommandList()
 	{
 		Handle<D12CommandList> command_list = nullptr;
 		if(!available_command_lists_.TryPop(command_list))
 		{
-			command_list = MakeHandle<D12CommandList>(device_, command_list_type_);
+			command_list = MakeHandle<D12CommandList>(device_, command_list_type_,this);
 		} 
 
 		return command_list;

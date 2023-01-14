@@ -134,23 +134,46 @@
     <ClInclude Include="include\rhi\command_list.h" />
     <ClInclude Include="include\rhi\command_queue.h" />
     <ClInclude Include="include\rhi\device.h" />
+    <ClInclude Include="include\rhi\graphics_pipeline.h" />
+    <ClInclude Include="include\rhi\input_layout.h" />
+    <ClInclude Include="include\rhi\binding_layout.h" />
+    <ClInclude Include="include\rhi\render_target.h" />
     <ClInclude Include="include\rhi\resource.h" />
+    <ClInclude Include="include\rhi\shader.h" />
+    <ClInclude Include="include\rhi\swap_chain.h" />
+    <ClInclude Include="include\rhi\texture.h" />
     <ClInclude Include="include\rhi\thread_safe_queue.hpp" />
     <ClInclude Include="include\rhi\types.h" />
+    <ClInclude Include="src\d3d12\d12_graphics_pipeline.h" />
+    <ClInclude Include="src\d3d12\d12_input_layout.h" />
+    <ClInclude Include="src\d3d12\d12_swap_chain.h" />
     <ClInclude Include="src\d3d12\d12_buffer.h" />
     <ClInclude Include="src\d3d12\d12_command_list.h" />
     <ClInclude Include="src\d3d12\d12_command_queue.h" />
     <ClInclude Include="src\d3d12\d12_convert.h" />
     <ClInclude Include="src\d3d12\d12_device.h" />
+    <ClInclude Include="src\d3d12\d12_texture.h" />
     <ClInclude Include="src\d3d12\d12_upload_buffer.h" />
+    <ClInclude Include="src\d3d12\resource_state_tracker.h" />
+    <ClInclude Include="src\d3d12\root_signature.h" />
+    <ClInclude Include="src\d3d12\upload_buffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\d3d12\command_queue.cpp" />
     <ClCompile Include="src\d3d12\d12_buffer.cpp" />
     <ClCompile Include="src\d3d12\d12_command_list.cpp" />
     <ClCompile Include="src\d3d12\d12_command_queue.cpp" />
+    <ClCompile Include="src\d3d12\d12_convert.cpp" />
     <ClCompile Include="src\d3d12\d12_device.cpp" />
+    <ClCompile Include="src\d3d12\d12_graphics_pipeline.cpp" />
+    <ClCompile Include="src\d3d12\d12_input_layout.cpp" />
+    <ClCompile Include="src\d3d12\d12_swap_chain.cpp" />
+    <ClCompile Include="src\d3d12\d12_texture.cpp" />
     <ClCompile Include="src\d3d12\d12_upload_buffer.cpp" />
+    <ClCompile Include="src\d3d12\resource_state_tracker.cpp" />
+    <ClCompile Include="src\d3d12\root_signature.cpp" />
+    <ClCompile Include="src\d3d12\upload_buffer.cpp" />
+    <ClCompile Include="src\render_target.cpp" />
     <ClCompile Include="src\test.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

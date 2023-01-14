@@ -11,14 +11,14 @@ namespace light::rhi
 	{
 		BufferType type = BufferType::kUnknown;
 		CpuAccess cpu_access = CpuAccess::kNone;
-		ResourceState initial_state;
-		
+
+		ResourceStates initial_state = ResourceStates::kCommon;
+
 		bool is_uav = false;
+		uint32_t stride = 0;
 		uint64_t byte = 0;
 
-#ifdef _DEBUG
-		std::wstring debug_name;
-#endif
+		std::string debug_name;
 	};
 
 	class Buffer : public Resource
@@ -26,13 +26,19 @@ namespace light::rhi
 	public:
 		explicit Buffer(const BufferDesc& desc)
 			: desc_(desc)
+			, permanent_state_(false)
 		{
 			
 		}
 
-		const BufferDesc& desc() const noexcept { return desc_; }
+		const BufferDesc& GetDesc() const noexcept { return desc_; }
+
+		void SetPermanentState(bool value) { permanent_state_ = value; }
+
+		bool IsPermanentState() const { return permanent_state_; }
 	protected:
 		BufferDesc desc_;
+		bool permanent_state_;
 	};
 
 	using BufferHandle = Handle<Buffer>;

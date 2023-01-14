@@ -63,6 +63,48 @@
     <ClInclude Include="include\rhi\thread_safe_queue.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="include\rhi\graphics_pipeline.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rhi\swap_chain.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\d3d12\d12_swap_chain.h">
+      <Filter>头文件\d3d12</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rhi\texture.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\d3d12\d12_texture.h">
+      <Filter>头文件\d3d12</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rhi\render_target.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\d3d12\d12_graphics_pipeline.h">
+      <Filter>头文件\d3d12</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rhi\shader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rhi\input_layout.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\d3d12\d12_input_layout.h">
+      <Filter>头文件\d3d12</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rhi\binding_layout.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\d3d12\root_signature.h">
+      <Filter>头文件\d3d12</Filter>
+    </ClInclude>
+    <ClInclude Include="src\d3d12\upload_buffer.h">
+      <Filter>头文件\d3d12</Filter>
+    </ClInclude>
+    <ClInclude Include="src\d3d12\resource_state_tracker.h">
+      <Filter>头文件\d3d12</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\d3d12\d12_device.cpp">
@@ -84,6 +126,33 @@
       <Filter>源文件\d3d12</Filter>
     </ClCompile>
     <ClCompile Include="src\d3d12\d12_upload_buffer.cpp">
+      <Filter>源文件\d3d12</Filter>
+    </ClCompile>
+    <ClCompile Include="src\d3d12\d12_swap_chain.cpp">
+      <Filter>源文件\d3d12</Filter>
+    </ClCompile>
+    <ClCompile Include="src\render_target.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\d3d12\d12_graphics_pipeline.cpp">
+      <Filter>源文件\d3d12</Filter>
+    </ClCompile>
+    <ClCompile Include="src\d3d12\d12_convert.cpp">
+      <Filter>源文件\d3d12</Filter>
+    </ClCompile>
+    <ClCompile Include="src\d3d12\d12_input_layout.cpp">
+      <Filter>源文件\d3d12</Filter>
+    </ClCompile>
+    <ClCompile Include="src\d3d12\root_signature.cpp">
+      <Filter>源文件\d3d12</Filter>
+    </ClCompile>
+    <ClCompile Include="src\d3d12\d12_texture.cpp">
+      <Filter>源文件\d3d12</Filter>
+    </ClCompile>
+    <ClCompile Include="src\d3d12\upload_buffer.cpp">
+      <Filter>源文件\d3d12</Filter>
+    </ClCompile>
+    <ClCompile Include="src\d3d12\resource_state_tracker.cpp">
       <Filter>源文件\d3d12</Filter>
     </ClCompile>
   </ItemGroup>

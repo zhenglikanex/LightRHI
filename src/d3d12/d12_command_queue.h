@@ -20,7 +20,7 @@ namespace light::rhi
 	public:
 		D12CommandQueue(D12Device* device, CommandListType type);
 
-		CommandListHandle GetCommandList() override;
+		CommandList* GetCommandList() override;
 
 		uint64_t Signal() override;
 
@@ -33,6 +33,8 @@ namespace light::rhi
 		uint64_t ExecuteCommandList(CommandList* command_list) override;
 
 		uint64_t ExecuteCommandLists(uint64_t num, CommandList* command_lists) override;
+
+		ID3D12CommandQueue* GetNative() { return queue_; }
 
 	private:
 		struct CommandListEntry

@@ -6,7 +6,6 @@
 
 namespace light::rhi
 {
-
 	class CommandQueue : public Resource
 	{
 	public:
@@ -15,7 +14,7 @@ namespace light::rhi
 		{
 		}
 
-		virtual CommandListHandle GetCommandList() = 0;
+		virtual CommandList* GetCommandList() = 0;
 
 		virtual uint64_t ExecuteCommandList(CommandList* command_list) = 0;
 		virtual uint64_t ExecuteCommandLists(uint64_t num, CommandList* command_lists) = 0;
@@ -31,4 +30,6 @@ namespace light::rhi
 	protected:
 		CommandListType command_list_type_;
 	};
+
+	using CommandQueueHandle = Handle<CommandQueue>;
 }

@@ -1,8 +1,5 @@
 #include "rhi/render_target.h"
 
-#undef max;
-#undef min;
-
 namespace light::rhi
 {
 	void RenderTarget::AttacthTexture(AttachmentPoint attachment_point, TextureHandle texture)

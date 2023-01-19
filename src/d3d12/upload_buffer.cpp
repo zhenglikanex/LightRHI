@@ -71,10 +71,14 @@ namespace light::rhi
 
 		Handle<ID3D12Resource> upload_resource;
 
+		CD3DX12_HEAP_PROPERTIES heap_properties(D3D12_HEAP_TYPE_UPLOAD);
+
+		CD3DX12_RESOURCE_DESC buffer_desc = CD3DX12_RESOURCE_DESC::Buffer(align_bytes);
+
 		device_->GetNative()->CreateCommittedResource(
-			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+			&heap_properties,
 			D3D12_HEAP_FLAG_NONE,
-			&CD3DX12_RESOURCE_DESC::Buffer(align_bytes),
+			&buffer_desc,
 			D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&upload_resource));
 
 		large_upload_resources_.push_back(upload_resource);
@@ -93,10 +97,14 @@ namespace light::rhi
 		, page_size_(page_size)
 		, offset_(0)
 	{
+		CD3DX12_HEAP_PROPERTIES heap_properties(D3D12_HEAP_TYPE_UPLOAD);
+
+		CD3DX12_RESOURCE_DESC buffer_desc = CD3DX12_RESOURCE_DESC::Buffer(page_size);
+
 		device_->GetNative()->CreateCommittedResource(
-			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+			&heap_properties,
 			D3D12_HEAP_FLAG_NONE,
-			&CD3DX12_RESOURCE_DESC::Buffer(page_size_),
+			&buffer_desc,
 			D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&resource_));
 
 		resource_->SetName(L"Upload Buffer (Page)");

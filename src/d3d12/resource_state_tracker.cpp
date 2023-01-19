@@ -81,7 +81,7 @@ namespace light::rhi
 		resource_barriers_.clear();
 	}
 
-	void ResourceStateTracker::FlushPendingResourceBarriers(D12CommandList* command_list)
+	uint32_t ResourceStateTracker::FlushPendingResourceBarriers(D12CommandList* command_list)
 	{
 		std::vector<D3D12_RESOURCE_BARRIER> resource_barriers;
 		resource_barriers.reserve(pending_resource_barriers_.size() * 2);
@@ -119,6 +119,8 @@ namespace light::rhi
 		}
 
 		pending_resource_barriers_.clear();
+
+		return resource_barriers.size();
 	}
 
 	void ResourceStateTracker::CommitFinalResourceStates()

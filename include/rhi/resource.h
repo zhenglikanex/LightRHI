@@ -57,7 +57,7 @@ namespace light::rhi
 
     protected:
         InterfaceType* ptr_;
-        template<class U> friend class RefCountPtr;
+        template<class U> friend class Handle;
 
         void InternalAddRef() const noexcept
         {
@@ -82,7 +82,6 @@ namespace light::rhi
         }
 
     public:
-
         Handle() noexcept : ptr_(nullptr)
         {
         }

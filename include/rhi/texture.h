@@ -1,15 +1,17 @@
 #pragma once
 
 #include <string>
-#include "rhi/resource.h"
+
+#include "resource.h"
+#include "types.h"
 
 namespace light::rhi
 {
 	struct TextureDesc
 	{
-		uint32_t width;
-		uint32_t height;
-		Format format;
+		uint32_t width = 0;
+		uint32_t height = 0;
+		Format format = Format::UNKNOWN;
 
 		std::string debug_name;
 	};

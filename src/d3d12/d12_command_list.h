@@ -68,7 +68,8 @@ namespace light::rhi
 	protected:
 		// 自动追踪使用中的资源声明周期
 		void TrackResource(Resource* resource) override;
-	public:
+
+		void FlushResourceBarriers() override;
 		
 	private:
 		D12Device* device_;

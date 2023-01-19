@@ -105,6 +105,12 @@
     <ClInclude Include="src\d3d12\resource_state_tracker.h">
       <Filter>头文件\d3d12</Filter>
     </ClInclude>
+    <ClInclude Include="src\game.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\d3d12\descriptor_allocator.h">
+      <Filter>头文件\d3d12</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\d3d12\d12_device.cpp">
@@ -153,6 +159,15 @@
       <Filter>源文件\d3d12</Filter>
     </ClCompile>
     <ClCompile Include="src\d3d12\resource_state_tracker.cpp">
+      <Filter>源文件\d3d12</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\test_game.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\d3d12\descriptor_allocator.cpp">
       <Filter>源文件\d3d12</Filter>
     </ClCompile>
   </ItemGroup>

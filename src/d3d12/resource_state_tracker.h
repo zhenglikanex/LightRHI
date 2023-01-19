@@ -38,7 +38,7 @@ namespace light::rhi
 
 		void FlushResourceBarriers(D12CommandList* command_list);
 
-		void FlushPendingResourceBarriers(D12CommandList* command_list);
+		uint32_t FlushPendingResourceBarriers(D12CommandList* command_list);
 
 		void CommitFinalResourceStates();
 

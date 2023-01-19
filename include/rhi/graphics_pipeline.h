@@ -12,7 +12,7 @@ namespace light::rhi
 {
 	struct GraphicsPipelineDesc
 	{
-		PrimitiveTopology primitive_type;
+		PrimitiveTopology primitive_type = PrimitiveTopology::kTriangleList;
 		InputLayoutHandle input_layout;
 		BindingLayoutHandle binding_layout;
 

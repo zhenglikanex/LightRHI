@@ -15,6 +15,19 @@ namespace light::rhi
 		desc.NodeMask = 0;
 
 		ThrowIfFailed(device_->GetNative()->CreateCommandQueue(&desc, IID_PPV_ARGS(&queue_)));
+		ThrowIfFailed(device_->GetNative()->CreateFence(fence_value_, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence_)));
+
+		switch (type) {
+		case CommandListType::kDirect:
+			queue_->SetName(L"Direct Command Queue");
+			break;
+		case CommandListType::kCompute:
+			queue_->SetName(L"Compute Command Queue");
+			break;
+		case CommandListType::kCopy:
+			queue_->SetName(L"Copy Command Queue");
+			break;
+		}
 	}
 
 	CommandList* D12CommandQueue::GetCommandList()
@@ -71,15 +84,26 @@ namespace light::rhi
 
 	uint64_t D12CommandQueue::ExecuteCommandLists(uint64_t num, CommandList* command_lists)
 	{
+		std::unique_lock<std::mutex> lock(ResourceStateTracker::s_global_mutex);
+
 		// 等待上传到fight_command_lists列表
 		std::vector<CommandList*> flight_command_lists;
-		flight_command_lists.reserve(num);
+		flight_command_lists.reserve(num * 2);
 
 		std::vector<ID3D12CommandList*> d3d12_command_lists;
-		d3d12_command_lists.reserve(num);
+		d3d12_command_lists.reserve(num * 2);
 
 		for (uint64_t i = 0; i < num; ++i)
 		{
+			auto pending_command_list = GetCommandList();
+			if (command_lists->Close(pending_command_list))
+			{
+				auto d12_pending_command_list = CheckedCast<D12CommandList*>(pending_command_list);
+				d12_pending_command_list->Close();
+
+				d3d12_command_lists.push_back(d12_pending_command_list->GetD3D12GraphicsCommandList());
+			}
+
 			auto d12_command_list = CheckedCast<D12CommandList*>(&command_lists[i]);
 			d3d12_command_lists.push_back(d12_command_list->GetD3D12GraphicsCommandList());
 
@@ -89,6 +113,8 @@ namespace light::rhi
 		queue_->ExecuteCommandLists(static_cast<UINT>(d3d12_command_lists.size()), d3d12_command_lists.data());
 
 		uint64_t fence_value = Signal();
+
+		lock.unlock();
 
 		// 记录执行中的command_list
 		for(auto& command_list : flight_command_lists)

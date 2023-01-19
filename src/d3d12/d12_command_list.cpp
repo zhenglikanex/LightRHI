@@ -176,7 +176,7 @@ namespace light::rhi
 			const auto& texture = textures[i];
 			if (texture)
 			{
-				auto d12_texture = CheckedCast<D12Texture*>(texture);
+				auto d12_texture = CheckedCast<D12Texture*>(texture.Get());
 
 				TransitionBarrier(d12_texture, ResourceStates::kRenderTarget);
 
@@ -191,7 +191,7 @@ namespace light::rhi
 		const auto& depth_texture = render_target.GetTexture(AttachmentPoint::kDepthStencil);
 		if(depth_texture)
 		{
-			auto d12_depth_texture = CheckedCast<D12Texture*>(depth_texture);
+			auto d12_depth_texture = CheckedCast<D12Texture*>(depth_texture.Get());
 
 			TransitionBarrier(d12_depth_texture, ResourceStates::kDepthWrite);
 
@@ -247,11 +247,21 @@ namespace light::rhi
 
 	bool D12CommandList::Close(CommandList* pending_command_list)
 	{
-		
+		//刷新剩余资源屏障
+		FlushResourceBarriers();
+
+		//刷新挂起的资源屏障
+		uint32_t num_pending_barries = resource_state_tracker_.FlushPendingResourceBarriers(CheckedCast<D12CommandList*>(pending_command_list));
+
+		// 提交最终资源导全局状态
+		resource_state_tracker_.CommitFinalResourceStates();
+
+		return num_pending_barries > 0;
 	}
 
 	void D12CommandList::Close()
 	{
+		FlushResourceBarriers();
 		d3d12_command_list_->Close();
 	}
 
@@ -274,5 +284,10 @@ namespace light::rhi
 	void D12CommandList::TrackResource(Resource* resource)
 	{
 		track_resources_.emplace_back(resource);
+	}
+
+	void D12CommandList::FlushResourceBarriers()
+	{
+		resource_state_tracker_.FlushResourceBarriers(this);
 	}
 }

@@ -78,6 +78,8 @@ namespace light::rhi
 
 		virtual void TrackResource(Resource* resource) = 0;
 
+		virtual void FlushResourceBarriers() = 0;
+
 		CommandListType type_;
 		CommandQueue* queue_;
 	};

@@ -102,14 +102,15 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include;3rdparty/glfw/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>lib/glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -154,9 +155,11 @@
     <ClInclude Include="src\d3d12\d12_device.h" />
     <ClInclude Include="src\d3d12\d12_texture.h" />
     <ClInclude Include="src\d3d12\d12_upload_buffer.h" />
+    <ClInclude Include="src\d3d12\descriptor_allocator.h" />
     <ClInclude Include="src\d3d12\resource_state_tracker.h" />
     <ClInclude Include="src\d3d12\root_signature.h" />
     <ClInclude Include="src\d3d12\upload_buffer.h" />
+    <ClInclude Include="src\game.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\d3d12\command_queue.cpp" />
@@ -170,11 +173,14 @@
     <ClCompile Include="src\d3d12\d12_swap_chain.cpp" />
     <ClCompile Include="src\d3d12\d12_texture.cpp" />
     <ClCompile Include="src\d3d12\d12_upload_buffer.cpp" />
+    <ClCompile Include="src\d3d12\descriptor_allocator.cpp" />
     <ClCompile Include="src\d3d12\resource_state_tracker.cpp" />
     <ClCompile Include="src\d3d12\root_signature.cpp" />
     <ClCompile Include="src\d3d12\upload_buffer.cpp" />
+    <ClCompile Include="src\game.cpp" />
     <ClCompile Include="src\render_target.cpp" />
     <ClCompile Include="src\test.cpp" />
+    <ClCompile Include="src\test_game.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

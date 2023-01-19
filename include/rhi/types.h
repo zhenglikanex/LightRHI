@@ -5,6 +5,13 @@
 
 namespace light::rhi
 {
+	enum class GraphicsApi
+	{
+		kNone,
+		kD3D12,
+		kVulkan
+	};
+
 	enum class ResourceStates
 	{
 		kCommon = 0,

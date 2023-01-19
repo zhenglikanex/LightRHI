@@ -34,7 +34,8 @@ namespace light::rhi
 			IID_PPV_ARGS(&resource_)));
 
 #ifdef _DEBUG
-		resource_->SetName(desc.debug_name.c_str());
+		// todo
+		//resource_->SetName( desc.debug_name.c_str());
 #endif
 	}
 }

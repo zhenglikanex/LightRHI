@@ -19,7 +19,6 @@ namespace light::rhi
 
 			std::wstring msg = err.ErrorMessage();
 			std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-			 converter.to_bytes(msg);
 
 			throw std::exception(converter.to_bytes(msg).c_str());
 		}
@@ -47,7 +46,7 @@ namespace light::rhi
 
 	TextureHandle D12Device::CreateTextureForNative(TextureDesc desc, void* resource)
 	{
-		return MakeHandle<D12Texture>(this, desc, resource);
+		return MakeHandle<D12Texture>(this, desc, static_cast<ID3D12Resource*>(resource));
 	}
 
 	InputLayoutHandle D12Device::CreateInputLayout(std::vector<VertexAttributeDesc> attributes)
@@ -91,5 +90,10 @@ namespace light::rhi
 		{
 			root_signature_cache_.erase(root_signature->GetHash());
 		}
+	}
+
+	uint32_t D12Device::GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE type) const
+	{
+		return device_->GetDescriptorHandleIncrementSize(type);
 	}
 }

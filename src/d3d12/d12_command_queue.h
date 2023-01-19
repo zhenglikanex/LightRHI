@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-
+#include <atomic>
 #include "d3dx12.h"
 
 #include "rhi/thread_safe_queue.hpp"
@@ -48,7 +48,7 @@ namespace light::rhi
 		ThreadSafeQueue<Handle<D12CommandList>> available_command_lists_;
 		ThreadSafeQueue<CommandListEntry> flight_command_lists_;
 		Handle<ID3D12Fence> fence_;
-		uint64_t fence_value_;
+		std::atomic_uint64_t fence_value_;
 		std::mutex mutex_;
 		std::condition_variable condition_;
 	};

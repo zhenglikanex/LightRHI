@@ -15,6 +15,8 @@ namespace light::rhi
 	class Device : public Resource
 	{
 	public:
+		virtual GraphicsApi GetGraphicsApi() const = 0;
+
 		virtual BufferHandle CreateBuffer(BufferDesc desc) = 0;
 		virtual TextureHandle CreateTexture(TextureDesc desc) = 0;
 		virtual TextureHandle CreateTextureForNative(TextureDesc desc, void* resource) = 0;

@@ -9,8 +9,6 @@
 
 using Microsoft::WRL::ComPtr;
 
-#undef max;
-#undef min;
 
 namespace light::rhi
 {
@@ -122,10 +120,12 @@ namespace light::rhi
 			desc.height = height_;
 			//GetDesc.format = 
 #ifdef _DEBUG
-			desc.debug_name = L"BackBuffer[" + std::to_wstring(i) + L"]";
+			//todo
+			//desc.debug_name = L"BackBuffer[" + std::to_wstring(i) + L"]";
 #endif
 
-			back_buffer_textures_[i] = device_->CreateTextureForNative(desc, back_buffer.Get());
+			TextureHandle texture = device_->CreateTextureForNative(desc, back_buffer.Get());
+			back_buffer_textures_[i].Attach(CheckedCast<D12Texture*>(texture.Detach()));
 		}
 	}
 }

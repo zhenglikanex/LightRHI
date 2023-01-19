@@ -12,6 +12,9 @@ namespace light::rhi
 #define CHECK(cond,msg)
 #endif
 
+#undef max
+#undef min
+
     // boost::hash_combine
     template <class T>
     void HashCombine(size_t& seed, const T& v)

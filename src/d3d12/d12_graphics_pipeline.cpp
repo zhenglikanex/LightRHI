@@ -14,7 +14,7 @@ namespace light::rhi
 
 		ZeroMemory(&pso_desc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
 
-		auto input_layout = CheckedCast<D12InputLayout*>(desc.input_layout);
+		auto input_layout = CheckedCast<D12InputLayout*>(desc.input_layout.Get());
 		pso_desc.InputLayout = { input_layout->GetInputElements(),input_layout->NumElements() };
 
 		pso_desc.pRootSignature = root_signature->GetNative();

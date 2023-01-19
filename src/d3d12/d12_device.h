@@ -30,6 +30,8 @@ namespace light::rhi
 
 		~D12Device() override = default;
 
+		GraphicsApi GetGraphicsApi() const override { return GraphicsApi::kD3D12; }
+
 		ID3D12Device* GetNative() noexcept { return device_; }
 
 		SwapChainHandle CreateSwapChian(HWND hwnd);
@@ -53,7 +55,8 @@ namespace light::rhi
 		RootSignatureHandle GetRootSignature(BindingLayout* binding_layout, bool allow_input_layout);
 
 		void ReleaseRootSignature(const RootSignature* root_signature);
-		
+
+		uint32_t GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE type) const;
 	private:
 		Handle<ID3D12Device> device_;
 		Handle<IDXGIFactory5> dxgi_factory_;

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <d3d12.h>
+
 #include "rhi/input_layout.h"
 
 namespace light::rhi

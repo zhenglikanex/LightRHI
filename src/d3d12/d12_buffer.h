@@ -1,7 +1,11 @@
 #pragma once
 
+#include <unordered_map>
+
 #include "d3dx12.h"
 #include "rhi/buffer.h"
+
+#include "descriptor_allocator.h"
 
 namespace light::rhi
 {
@@ -12,9 +16,22 @@ namespace light::rhi
 	public:
 		D12Buffer(D12Device* device,const BufferDesc& desc);
 
-		ID3D12Resource* GetNative() { return resource_.Get(); }
+		D3D12_CPU_DESCRIPTOR_HANDLE GetCBV();
+		D3D12_CPU_DESCRIPTOR_HANDLE GetSBV(uint32_t offset = 0);
+		D3D12_CPU_DESCRIPTOR_HANDLE GetSBV(uint32_t offset, uint32_t byte_size);
+		D3D12_CPU_DESCRIPTOR_HANDLE GetUBV();
 
+		ID3D12Resource* GetNative() { return resource_.Get(); }
 	private:
+		void CreateCBV();
+		void CreateSBV();
+		void CreateUBV();
+
+		D12Device* device_;
 		Handle<ID3D12Resource> resource_;
+
+		DescriptorAllocation cbv_;
+		std::unordered_map<size_t, DescriptorAllocation> sbv_map_;
+		DescriptorAllocation ubv_;
 	};
 }

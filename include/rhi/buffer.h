@@ -16,7 +16,7 @@ namespace light::rhi
 
 		bool is_uav = false;
 		uint32_t stride = 0;
-		uint64_t byte = 0;
+		uint32_t byte = 0;
 
 		std::string debug_name;
 	};

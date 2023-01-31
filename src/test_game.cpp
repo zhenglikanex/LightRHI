@@ -45,7 +45,7 @@ public:
 
 		RenderTarget rt = swap_chain_->GetRenderTarget();
 
-		command_list->SetRednerTarget(rt);
+		command_list->SetRenderTarget(rt);
 		command_list->SetViewport(rt.GetViewport());
 		command_list->SetScissorRect({ 0,0,std::numeric_limits<uint32_t>::max(),std::numeric_limits<uint32_t>::max() });
 

@@ -39,13 +39,28 @@ namespace light::rhi
 
 		void SetGraphics32BitConstants(uint32_t parameter_index, uint32_t num_constants,const void* constants) override;
 
+		void SetBufferView(uint32_t parameter_index, Buffer* buffer, uint32_t offset, ResourceStates state_after) override;
+
+		void SetConstantBufferView(uint32_t parameter_index, Buffer* buffer, uint32_t offset,
+			ResourceStates state_after) override;
+
+		void SetConstantBufferView(uint32_t parameter_index,uint32_t descriptor_offset, Buffer* buffer, uint32_t offset, uint32_t byte_size,
+			ResourceStates state_after) override;
+
+		void SetStructBufferView(uint32_t parameter_index, Buffer* buffer, uint32_t offset, uint32_t byte_size,
+			ResourceStates state_after) override;
+
+		void SetStructBufferView(uint32_t parameter_index, Buffer* buffer, ResourceStates state_after) override;
+
+		void SetUnoderedAccessBufferView(uint32_t parameter_index, Buffer* buffer, ResourceStates state_after) override;
+
 		void SetGraphicsPipeline(GraphicsPipeline* pso) override;
 
 		void SetVertexBuffer(uint32_t slot, Buffer* buffer) override;
 
 		void SetIndexBuffer(Buffer* buffer) override;
 
-		void SetRednerTarget(const RenderTarget& render_target) override;
+		void SetRenderTarget(const RenderTarget& render_target) override;
 
 		void SetViewport(const Viewport& viewport) override;
 
@@ -75,7 +90,9 @@ namespace light::rhi
 		void TrackResource(Resource* resource) override;
 
 		void FlushResourceBarriers() override;
+	public:
 		
+
 	private:
 		D12Device* device_;
 		Handle<ID3D12CommandAllocator> d3d12_command_allocator_;
@@ -87,6 +104,7 @@ namespace light::rhi
 		std::unique_ptr<DynamicDescriptorHeap> dynamic_descriptor_heaps_[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES];
 		GraphicsPipeline* current_pso_;
 		ID3D12DescriptorHeap* descriptr_heaps_[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES];
+		D3D12_GPU_VIRTUAL_ADDRESS buffer_gpu_virtual_address_[32];
 	};
 
 }

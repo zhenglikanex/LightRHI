@@ -48,15 +48,21 @@ namespace light::rhi
 			SetGraphics32BitConstants(parameter_index, sizeof(T) / sizeof(uint32_t), &constants);
 		}
 
-		void SetConstantBufferView(uint32_t parameter_index, Buffer* buffer, ResourceStates state_after = ResourceStates::kVertexAndConstantBuffer);
+		virtual void SetBufferView(uint32_t parameter_index, Buffer* buffer,uint32_t offset = 0, ResourceStates state_after = ResourceStates::kVertexAndConstantBuffer) = 0;
 
-		void SetStructBufferView(uint32_t parameter_index, Buffer* buffer, ResourceStates state_after = ResourceStates::kGenericRead);
+		virtual void SetConstantBufferView(uint32_t parameter_index, uint32_t descriptor_offset, Buffer* buffer, uint32_t offset = 0, ResourceStates state_after = ResourceStates::kVertexAndConstantBuffer) = 0;
 
-		void SetUnorderAccessBufferView(uint32_t parameter_index, Buffer* buffer, ResourceStates state_after = ResourceStates::kGenericRead);
+		virtual void SetConstantBufferView(uint32_t parameter_index, uint32_t descriptor_offset, Buffer* buffer, uint32_t offset, uint32_t byte_size, ResourceStates state_after = ResourceStates::kVertexAndConstantBuffer) = 0;
 
+		virtual void SetStructBufferView(uint32_t parameter_index, uint32_t descriptor_offset, Buffer* buffer, uint32_t offset = 0, ResourceStates state_after = ResourceStates::kGenericRead) = 0;
 
+		virtual void SetStructBufferView(uint32_t parameter_index, uint32_t descriptor_offset, Buffer* buffer, uint32_t offset, uint32_t byte_size, ResourceStates state_after = ResourceStates::kGenericRead) = 0;
 
-		void SetShaderResourceView(uint32_t parameter_index,Texture* texture,)
+		virtual void SetUnoderedAccessBufferView(uint32_t parameter_index, uint32_t descriptor_offset, Buffer* buffer, uint32_t offset = 0, ResourceStates state_after = ResourceStates::kUnorderedAccess) = 0;
+
+		virtual void SetUnoderedAccessBufferView(uint32_t parameter_index, uint32_t descriptor_offset, Buffer* buffer, uint32_t offset, uint32_t byte_size, ResourceStates state_after = ResourceStates::kUnorderedAccess) = 0;
+
+		//virtual void SetShaderResourceView(uint32_t parameter_index,Texture* texture,ResourceStates state_after = ResourceStates::)
 
 		virtual void SetGraphicsPipeline(GraphicsPipeline* pso) = 0;
 
@@ -64,7 +70,7 @@ namespace light::rhi
 
 		virtual void SetIndexBuffer(Buffer* buffer) = 0;
 
-		virtual void SetRednerTarget(const RenderTarget& target) = 0;
+		virtual void SetRenderTarget(const RenderTarget& target) = 0;
 
 		virtual void SetViewport(const Viewport& viewport) = 0;
 

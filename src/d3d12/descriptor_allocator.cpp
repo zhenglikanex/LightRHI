@@ -71,7 +71,7 @@ namespace light::rhi
 
 	D3D12_CPU_DESCRIPTOR_HANDLE DescriptorAllocation::GetDescriptorHandle(uint32_t offset) const
 	{
-		return GetDescriptorHandle(offset);
+		return CD3DX12_CPU_DESCRIPTOR_HANDLE(descriptor_, static_cast<INT>(offset * descriptor_size_));
 	}
 
 	uint32_t DescriptorAllocation::GetNumHandles() const

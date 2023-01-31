@@ -26,6 +26,11 @@ namespace light::rhi
 			dynamic_descriptor_heaps_[type] = std::make_unique<DynamicDescriptorHeap>(device_, static_cast<D3D12_DESCRIPTOR_HEAP_TYPE>(type));
 			descriptr_heaps_[type] = nullptr;
 		}
+
+		for (size_t i = 0; i < 32; ++i)
+		{
+			buffer_gpu_virtual_address_[i] = ~0ul;
+		}
 	}
 
 	D12CommandList::~D12CommandList()
@@ -132,6 +137,64 @@ namespace light::rhi
 		d3d12_command_list_->SetGraphicsRoot32BitConstants(parameter_index, num_constants, constants, 0);
 	}
 
+	void D12CommandList::SetBufferView(uint32_t parameter_index, Buffer* buffer, uint32_t offset,
+		ResourceStates state_after)
+	{
+		TrackResource(buffer);
+
+		TransitionBarrier(buffer, state_after);
+
+		auto d12_buffer = CheckedCast<D12Buffer*>(buffer);
+		buffer_gpu_virtual_address_[parameter_index] = d12_buffer->GetNative()->GetGPUVirtualAddress() + offset;
+	}
+
+	void D12CommandList::SetConstantBufferView(uint32_t parameter_index, Buffer* buffer, uint32_t offset,
+		ResourceStates state_after)
+	{
+		SetConstantBufferView(parameter_index, buffer, offset, buffer->GetDesc().byte, state_after);
+	}
+
+	void D12CommandList::SetConstantBufferView(uint32_t parameter_index, Buffer* buffer, uint32_t offset,
+		uint32_t byte_size, ResourceStates state_after)
+	{
+		TrackResource(buffer);
+
+		TransitionBarrier(buffer,state_after);
+
+		auto d12_buffer = CheckedCast<D12Buffer*>(buffer);
+		dynamic_descriptor_heaps_[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV]->StageDescriptors() d12_buffer->GetSBV(offset, byte_size);
+
+	}
+
+	void D12CommandList::SetStructBufferView(uint32_t parameter_index, Buffer* buffer, uint32_t offset,
+		uint32_t byte_size, ResourceStates state_after)
+	{
+	}
+
+	void D12CommandList::SetBuffer(uint32_t parameter_index, Buffer* buffer, ResourceStates state_after)
+	{
+		
+	}
+
+	void D12CommandList::SetConstantBufferView(uint32_t parameter_index, Buffer* buffer, ResourceStates state_after)
+	{
+		TrackResource(buffer);
+
+		TransitionBarrier(buffer, state_after);
+
+		auto d12_buffer = CheckedCast<D12Buffer*>(buffer);
+		dynamic_descriptor_heaps_[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV]->StageDescriptors(parameter_index,0,1,)
+	}
+
+	void D12CommandList::SetStructBufferView(uint32_t parameter_index, Buffer* buffer, ResourceStates state_after)
+	{
+	}
+
+	void D12CommandList::SetUnoderedAccessBufferView(uint32_t parameter_index, Buffer* buffer,
+		ResourceStates state_after)
+	{
+	}
+
 	void D12CommandList::SetGraphicsPipeline(GraphicsPipeline* pso)
 	{
 		if(current_pso_ != pso)
@@ -177,7 +240,7 @@ namespace light::rhi
 		d3d12_command_list_->IASetIndexBuffer(&view);
 	}
 
-	void D12CommandList::SetRednerTarget(const RenderTarget& render_target)
+	void D12CommandList::SetRenderTarget(const RenderTarget& render_target)
 	{
 		std::array<D3D12_CPU_DESCRIPTOR_HANDLE,static_cast<uint32_t>(AttachmentPoint::kNumAttachmentPoints)> render_target_descriptors{};
 		uint32_t num_render_target = 0;

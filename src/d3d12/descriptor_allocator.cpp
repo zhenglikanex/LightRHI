@@ -151,7 +151,15 @@ namespace light::rhi
 
 	void DescriptorAllocatorPage::ReleaseStaleDescriptors()
 	{
+		std::unique_lock lock(mutex_);
 
+		while (!stale_descriptor_infos_.empty())
+		{
+			auto& info = stale_descriptor_infos_.front();
+			FreeBlock(info.offset, info.size);
+
+			stale_descriptor_infos_.pop();
+		}
 	}
 
 	DescriptorAllocatorPage::DescriptorAllocatorPage(D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE type,
@@ -188,12 +196,133 @@ namespace light::rhi
 		}
 		else
 		{
-			free_list_.emplace(num_descriptors, std::set({ offset }));
+			free_list_.emplace(num_descriptors, std::set({ BlockInfo(offset) }));
 		}
 	}
 
 	void DescriptorAllocatorPage::FreeBlock(uint32_t offset, uint32_t num_descriptors)
 	{
-		free_list_.find(num)
+		auto pool_it = free_list_.find(num_descriptors);
+		if (pool_it == free_list_.end())
+		{
+			free_list_.emplace(num_descriptors, std::set({ BlockInfo(offset) }));
+			return;
+		}
+
+		uint32_t new_offset = offset;
+		uint32_t new_num_descriptors = num_descriptors;
+		BlockInfo cur_block(offset);
+
+		auto next_block_it = pool_it->second.upper_bound(cur_block);
+		
+		// 向上合并连续的块
+		if (next_block_it != pool_it->second.begin())
+		{
+			auto prev_block_it = --next_block_it;
+			
+			// 是否连续
+			if (prev_block_it->offset + num_descriptors == offset)
+			{
+				new_offset = prev_block_it->offset;
+				new_num_descriptors += num_descriptors;
+
+				//移除,等待合并后加入
+				pool_it->second.erase(prev_block_it);
+			}
+		}
+
+		// 向下合并连续的块
+		if (next_block_it != pool_it->second.end())
+		{
+			// 是否连续
+			if (offset + num_descriptors == next_block_it->offset)
+			{
+				new_num_descriptors += num_descriptors;
+				
+				//移除,等待合并后加入
+				pool_it->second.erase(next_block_it);
+			}
+		}
+
+		// 移除空的池子
+		if(pool_it->second.empty())
+		{
+			free_list_.erase(pool_it);
+		}
+
+		// 插入block
+		AddNewBlock(new_offset, new_num_descriptors);
+	}
+
+	DescriptorAllocator::DescriptorAllocator(D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t page_size)
+		: device_(device)
+		, heap_type_(type)
+		, page_size_(page_size)
+	{
+	}
+
+	DescriptorAllocator::~DescriptorAllocator()
+	{
+
+	}
+
+	DescriptorAllocation DescriptorAllocator::Allocate(uint32_t num_descriptors)
+	{
+		std::unique_lock<std::mutex> lock(mutex_);
+
+		DescriptorAllocation allocation;
+
+		auto iter = available_pages_.begin();
+		while(iter != available_pages_.end())
+		{
+			auto& page = pages_[*iter];
+			allocation = page->Allocate(num_descriptors);
+
+			if(page->NumFreeHandles() == 0)
+			{
+				// 将空的从存活的列表中移除
+				iter = available_pages_.erase(iter);
+			}
+			else
+			{
+				++iter;
+			}
+
+			if(allocation.IsValid())
+			{
+				break;
+			}
+		}
+
+		if(allocation.IsNull())
+		{
+			auto page = CreateAllocatorPage();
+			allocation = page->Allocate(num_descriptors);
+		}
+	}
+
+	void DescriptorAllocator::ReleaseStaleDescriptors()
+	{
+		std::unique_lock<std::mutex> lock(mutex_);
+
+		for (size_t i = 0; i < pages_.size(); ++i)
+		{
+			pages_[i]->ReleaseStaleDescriptors();
+
+			if (pages_[i]->NumFreeHandles() > 0)
+			{
+				available_pages_.insert(i);
+			}
+		}
+	}
+
+	DescriptorAllocatorPage* DescriptorAllocator::CreateAllocatorPage()
+	{
+		auto page = std::make_unique<DescriptorAllocatorPage>(device_, heap_type_, page_size_);
+		pages_.push_back(std::move(page));
+
+		available_pages_.insert(pages_.size());
+
+		return pages_.back().get();
 	}
 }

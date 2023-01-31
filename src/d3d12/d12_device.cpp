@@ -24,6 +24,19 @@ namespace light::rhi
 		}
 	}
 
+	D12Device::D12Device()
+	{
+		queues_[static_cast<size_t>(CommandListType::kDirect)] = MakeHandle<D12CommandQueue>(this, CommandListType::kDirect);
+		queues_[static_cast<size_t>(CommandListType::kCompute)] = MakeHandle<D12CommandQueue>(this, CommandListType::kCompute);
+		queues_[static_cast<size_t>(CommandListType::kCopy)] = MakeHandle<D12CommandQueue>(this, CommandListType::kCopy);
+
+		for (int i = 0; i < D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES; ++i)
+		{
+			descriptor_allocators_[i] = 
+				std::make_unique<DescriptorAllocator>(this, static_cast<D3D12_DESCRIPTOR_HEAP_TYPE>(i));
+		}
+	}
+
 	SwapChainHandle D12Device::CreateSwapChian(HWND hwnd)
 	{
 		return MakeHandle<D12SwapChain>(this, hwnd);
@@ -84,11 +97,32 @@ namespace light::rhi
 		return MakeHandle<RootSignature>(this, hash, binding_layout, allow_input_layout);
 	}
 
+	DescriptorAllocation D12Device::AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t num_descriptors)
+	{
+		return descriptor_allocators_[type]->Allocate(num_descriptors);
+	}
+
+	void D12Device::Flush()
+	{
+		for(auto queue : queues_)
+		{
+			queue->Flush();
+		}
+	}
+
 	void D12Device::ReleaseRootSignature(const RootSignature* root_signature)
 	{
 		if(root_signature)
 		{
 			root_signature_cache_.erase(root_signature->GetHash());
+		}
+	}
+
+	void D12Device::ReleaseStaleDescriptors()
+	{
+		for(auto& descriptor_allocator: descriptor_allocators_)
+		{
+			descriptor_allocator->ReleaseStaleDescriptors();
 		}
 	}
 

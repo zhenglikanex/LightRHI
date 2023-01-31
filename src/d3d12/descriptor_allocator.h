@@ -96,6 +96,11 @@ namespace light::rhi
 			}
 
 			OffsetType offset;
+
+			bool operator<(BlockInfo rhs) const
+			{
+				return offset < rhs.offset;
+			}
 		};
 
 		using FreeList = std::map<SizeType,std::set<BlockInfo>>;
@@ -130,8 +135,21 @@ namespace light::rhi
 	class DescriptorAllocator
 	{
 	public:
-
+		DescriptorAllocator(D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t page_size = 256);
+		~DescriptorAllocator();
+		
+		DescriptorAllocation Allocate(uint32_t num_descriptors = 1);
+		
+		void ReleaseStaleDescriptors();
 	private:
+		DescriptorAllocatorPage* CreateAllocatorPage();
 
+		D12Device* device_;
+		D3D12_DESCRIPTOR_HEAP_TYPE heap_type_;
+		uint32_t page_size_;
+
+		std::vector<std::unique_ptr<DescriptorAllocatorPage>> pages_;
+		std::set<size_t> available_pages_;
+		std::mutex mutex_;
 	};
 }

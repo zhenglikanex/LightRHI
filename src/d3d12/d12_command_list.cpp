@@ -21,11 +21,24 @@ namespace light::rhi
 			nullptr, 
 			IID_PPV_ARGS(&d3d12_command_list_)));
 
+		for (size_t type = 0; type <= D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES; ++type)
+		{
+			dynamic_descriptor_heaps_[type] = std::make_unique<DynamicDescriptorHeap>(device_, static_cast<D3D12_DESCRIPTOR_HEAP_TYPE>(type));
+			descriptr_heaps_[type] = nullptr;
+		}
 	}
 
 	D12CommandList::~D12CommandList()
 	{
 
+	}
+
+	void D12CommandList::SetDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE type, ID3D12DescriptorHeap* heap)
+	{
+		if(descriptr_heaps_[type] != heap)
+		{
+			descriptr_heaps_[type] = heap;
+		}
 	}
 
 	void D12CommandList::TransitionBarrier(Buffer* buffer, ResourceStates state_afeter, uint32_t subresource,
@@ -279,6 +292,22 @@ namespace light::rhi
 	                                 int32_t base_vertex, uint32_t start_instance)
 	{
 		d3d12_command_list_->DrawIndexedInstanced(index_count, instance_count, start_index, base_vertex, start_instance);
+	}
+
+	void D12CommandList::CommitDescriptorHeaps()
+	{
+		uint32_t num_heaps = 0;
+		ID3D12DescriptorHeap* heap[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES];
+
+		for (size_t type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV; type < D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES; ++type)
+		{
+			if(descriptr_heaps_[type])
+			{
+				heap[num_heaps++] = descriptr_heaps_[type];
+			}
+		}
+
+		d3d12_command_list_->SetDescriptorHeaps(num_heaps, heap);
 	}
 
 	void D12CommandList::TrackResource(Resource* resource)

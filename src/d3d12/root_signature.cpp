@@ -7,8 +7,11 @@ namespace light::rhi
 	RootSignature::RootSignature(D12Device* device,size_t hash,BindingLayoutHandle binding_layout, bool allow_input_layout)
 		: device_(device)
 		, hash_(hash)
+		, num_parameters_(0)
 	{
 		const auto& parameters = binding_layout->GetParameters();
+
+		num_parameters_ = parameters.size();
 
 		std::vector<D3D12_ROOT_PARAMETER1> root_parameters(parameters.size());
 
@@ -26,12 +29,14 @@ namespace light::rhi
 
 				for (uint32_t range_index = 0; range_index < in.descriptor_table.num_descriptor_ranges; ++range_index)
 				{
-					auto& range = descriptor_ranges[i];
+					auto& range = descriptor_ranges[range_index];
 					range.RangeType = ConvertDescriptorRangeType(in.descriptor_table.descriptor_ranges[i].range_type);
 					range.NumDescriptors = in.descriptor_table.descriptor_ranges[i].num_descriptors;
 					range.BaseShaderRegister = in.descriptor_table.descriptor_ranges[i].base_shader_register;
 					range.RegisterSpace = in.descriptor_table.descriptor_ranges[i].register_space;
 					range.OffsetInDescriptorsFromTableStart = in.descriptor_table.descriptor_ranges[i].offset_in_descriptors_from_table_start;
+
+					
 				}
 
 				out.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;

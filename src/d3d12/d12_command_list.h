@@ -6,6 +6,7 @@
 
 #include "upload_buffer.h"
 #include "resource_state_tracker.h"
+#include "dynamic_descriptor_heap.h"
 
 #include "d3dx12.h"
 
@@ -19,6 +20,8 @@ namespace light::rhi
 	public:
 		D12CommandList(D12Device* device,CommandListType type,CommandQueue* queue);
 		~D12CommandList() override;
+
+		void SetDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE type,ID3D12DescriptorHeap* heap);
 
 		void TransitionBarrier(Buffer* buffer, ResourceStates state_afeter, uint32_t subresource = ~0, bool flush_barriers = false,
 		                       bool permanent = true) override;
@@ -66,6 +69,8 @@ namespace light::rhi
 		ID3D12GraphicsCommandList* GetD3D12GraphicsCommandList() { return d3d12_command_list_; }
 
 	protected:
+		void CommitDescriptorHeaps();
+
 		// 自动追踪使用中的资源声明周期
 		void TrackResource(Resource* resource) override;
 
@@ -79,7 +84,9 @@ namespace light::rhi
 		std::vector<Handle<ID3D12Resource>> track_upload_resources_;
 		UploadBuffer upload_buffer_;
 		ResourceStateTracker resource_state_tracker_;
+		std::unique_ptr<DynamicDescriptorHeap> dynamic_descriptor_heaps_[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES];
 		GraphicsPipeline* current_pso_;
+		ID3D12DescriptorHeap* descriptr_heaps_[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES];
 	};
 
 }

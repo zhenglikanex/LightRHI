@@ -14,7 +14,7 @@
 #include "d12_graphics_pipeline.h"
 #include "d12_swap_chain.h"
 #include "root_signature.h"
-
+#include "descriptor_allocator.h"
 
 namespace light::rhi
 {
@@ -26,7 +26,7 @@ namespace light::rhi
 	class D12Device final : public Device
 	{
 	public:
-		D12Device() = default;
+		D12Device();
 
 		~D12Device() override = default;
 
@@ -54,13 +54,20 @@ namespace light::rhi
 
 		RootSignatureHandle GetRootSignature(BindingLayout* binding_layout, bool allow_input_layout);
 
+		DescriptorAllocation AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t num_descriptors);
+
+		void Flush();
+
 		void ReleaseRootSignature(const RootSignature* root_signature);
+
+		void ReleaseStaleDescriptors();
 
 		uint32_t GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE type) const;
 	private:
 		Handle<ID3D12Device> device_;
 		Handle<IDXGIFactory5> dxgi_factory_;
-		Handle<D12CommandQueue> queues_[static_cast<size_t>(CommandListType::kCopy) + 1];
+		std::array<Handle<D12CommandQueue>, static_cast<size_t>(CommandListType::kCopy) + 1> queues_;
 		std::unordered_map<size_t, RootSignature*> root_signature_cache_;
+		std::array<std::unique_ptr<DescriptorAllocator>, D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES> descriptor_allocators_;
 	};
 }

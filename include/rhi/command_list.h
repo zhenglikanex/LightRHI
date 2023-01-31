@@ -48,6 +48,16 @@ namespace light::rhi
 			SetGraphics32BitConstants(parameter_index, sizeof(T) / sizeof(uint32_t), &constants);
 		}
 
+		void SetConstantBufferView(uint32_t parameter_index, Buffer* buffer, ResourceStates state_after = ResourceStates::kVertexAndConstantBuffer);
+
+		void SetStructBufferView(uint32_t parameter_index, Buffer* buffer, ResourceStates state_after = ResourceStates::kGenericRead);
+
+		void SetUnorderAccessBufferView(uint32_t parameter_index, Buffer* buffer, ResourceStates state_after = ResourceStates::kGenericRead);
+
+
+
+		void SetShaderResourceView(uint32_t parameter_index,Texture* texture,)
+
 		virtual void SetGraphicsPipeline(GraphicsPipeline* pso) = 0;
 
 		virtual void SetVertexBuffer(uint32_t slot, Buffer* buffer) = 0;

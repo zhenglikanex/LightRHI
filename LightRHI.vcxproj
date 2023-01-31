@@ -156,6 +156,7 @@
     <ClInclude Include="src\d3d12\d12_texture.h" />
     <ClInclude Include="src\d3d12\d12_upload_buffer.h" />
     <ClInclude Include="src\d3d12\descriptor_allocator.h" />
+    <ClInclude Include="src\d3d12\dynamic_descriptor_heap.h" />
     <ClInclude Include="src\d3d12\resource_state_tracker.h" />
     <ClInclude Include="src\d3d12\root_signature.h" />
     <ClInclude Include="src\d3d12\upload_buffer.h" />
@@ -174,6 +175,7 @@
     <ClCompile Include="src\d3d12\d12_texture.cpp" />
     <ClCompile Include="src\d3d12\d12_upload_buffer.cpp" />
     <ClCompile Include="src\d3d12\descriptor_allocator.cpp" />
+    <ClCompile Include="src\d3d12\dynamic_descriptor_heap.cpp" />
     <ClCompile Include="src\d3d12\resource_state_tracker.cpp" />
     <ClCompile Include="src\d3d12\root_signature.cpp" />
     <ClCompile Include="src\d3d12\upload_buffer.cpp" />

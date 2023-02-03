@@ -10,12 +10,13 @@
 
 namespace light::rhi
 {
+	class CommandQueue;
 	class D12Device;
+	class CommandList;
 
 	class D12SwapChain final : public SwapChain
 	{
 	public:
-		static constexpr uint32_t kBufferCount = 2;
 
 		D12SwapChain(D12Device* device, HWND hwnd);
 
@@ -24,10 +25,16 @@ namespace light::rhi
 		void Resize(uint32_t width, uint32_t height) override;
 
 		RenderTarget GetRenderTarget() override;
+
+		uint32_t GetWidth() override { return width_; }
+
+		uint32_t GetHeight() override { return height_; }
 	private:
 		void UpdateRenderTargetViews();
-	
+
 		D12Device* device_;
+		CommandQueue* command_queue_;
+		CommandList* command_list_;
 		HWND hwnd_;
 		uint32_t width_;
 		uint32_t height_;

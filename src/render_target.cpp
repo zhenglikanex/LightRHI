@@ -2,24 +2,38 @@
 
 namespace light::rhi
 {
-	void RenderTarget::AttacthTexture(AttachmentPoint attachment_point, TextureHandle texture)
+	void RenderTarget::AttacthAttachment(AttachmentPoint attachment_point, TextureHandle texture)
 	{
-		textures_[static_cast<uint32_t>(attachment_point)] = texture;
+		Attachment attachment;
+		attachment.texture = texture;
+
+		attachments_[static_cast<uint32_t>(attachment_point)] = attachment;
 	}
 
-	TextureHandle RenderTarget::GetTexture(AttachmentPoint attachment_point) const
+	void RenderTarget::AttacthAttachment(AttachmentPoint attachment_point, TextureHandle texture, uint32_t mip_level,
+		uint32_t array_slice)
 	{
-		return textures_[static_cast<uint32_t>(attachment_point)];
+		Attachment attachment;
+		attachment.texture = texture;
+		attachment.mip_level = mip_level;
+		attachment.array_slice = array_slice;
+
+		attachments_[static_cast<uint32_t>(attachment_point)] = attachment;
+	}
+
+	Attachment RenderTarget::GetAttachment(AttachmentPoint attachment_point) const
+	{
+		return attachments_[static_cast<uint32_t>(attachment_point)];
 	}
 
 	uint32_t RenderTarget::GetWidth() const
 	{
 		uint32_t width = 0;
-		for (auto& texture : textures_)
+		for (auto& attachment : attachments_)
 		{
-			if (texture)
+			if (attachment.texture)
 			{
-				const TextureDesc& desc = texture->GetDesc();
+				const TextureDesc& desc = attachment.texture->GetDesc();
 				width = std::max(width, desc.width);
 			}
 		}
@@ -30,11 +44,11 @@ namespace light::rhi
 	uint32_t RenderTarget::GetHeight() const
 	{
 		uint32_t height = 0;
-		for (auto& texture : textures_)
+		for (auto& attachment : attachments_)
 		{
-			if (texture)
+			if (attachment.texture)
 			{
-				const TextureDesc& desc = texture->GetDesc();
+				const TextureDesc& desc = attachment.texture->GetDesc();
 				height = std::max(height, desc.height);
 			}
 		}
@@ -56,7 +70,7 @@ namespace light::rhi
 
 		for (uint32_t i = 0; i < static_cast<uint32_t>(AttachmentPoint::kDepthStencil); ++i)
 		{
-			if (textures_[i])
+			if (attachments_[i].texture)
 			{
 				++num;
 			}

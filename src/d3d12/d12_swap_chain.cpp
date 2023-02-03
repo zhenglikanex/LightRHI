@@ -9,24 +9,33 @@
 
 using Microsoft::WRL::ComPtr;
 
-
 namespace light::rhi
 {
 	D12SwapChain::D12SwapChain(D12Device* device, HWND hwnd)
 		: device_(device)
 		, hwnd_(hwnd)
 	{
+		command_queue_ = device_->GetCommandQueue(CommandListType::kDirect);
+		command_list_ = device_->GetCommandList(CommandListType::kDirect);
+
 		RECT window_rect;
 		::GetClientRect(hwnd_, &window_rect);
 
-
 		width_ = window_rect.right - window_rect.left;
-		height_ = window_rect.top - window_rect.bottom;
+		height_ = window_rect.bottom - window_rect.top;
+
+		bool allow_tearing = false;
+		/*if (SUCCEEDED(device_->GetDxgiFactory()->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allow_tearing, sizeof(bool))))
+		{
+			allow_tearing = true;
+		}*/
+
+		
 
 		DXGI_SWAP_CHAIN_DESC1 desc{};
 		desc.Width = width_;
 		desc.Height = height_;
-		desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		desc.Format = GetDxgiFormatMapping(kBufferForamt).rtv_format;
 		desc.Stereo = FALSE;
 		desc.SampleDesc = { 1,0 };
 		desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
@@ -35,19 +44,47 @@ namespace light::rhi
 		desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 		desc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 		// It is recommended to always allow tearing if tearing support is available.
-		desc.Flags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
+		desc.Flags = allow_tearing ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
+		desc.Flags |= DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
 
 		CommandQueue* queue = device_->GetCommandQueue(CommandListType::kDirect);
 		auto d12_queue = CheckedCast<D12CommandQueue*>(queue);
+		IDXGIFactory* factory;
+
+		DXGI_SWAP_CHAIN_DESC sd;
+		sd.BufferDesc.Width = width_;
+		sd.BufferDesc.Height = height_;
+		sd.BufferDesc.RefreshRate.Numerator = 60;
+		sd.BufferDesc.RefreshRate.Denominator = 1;
+		sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		sd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+		sd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+		sd.SampleDesc.Count = 1;
+		sd.SampleDesc.Quality = 0;
+		sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		sd.BufferCount = 2;
+		sd.OutputWindow = hwnd_;
+		sd.Windowed = true;
+		sd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+		sd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
+
+		// 注意交换链需要通过命令队列进行刷新
+		ComPtr<IDXGISwapChain> swap_chain;
+		ThrowIfFailed(device_->GetDxgiFactory()->CreateSwapChain(
+			d12_queue->GetNative(),
+			&sd,
+			swap_chain.GetAddressOf()));
 
 		ComPtr<IDXGISwapChain1> swap_chain1;
-		ThrowIfFailed( device_->GetDxgiFactory()->CreateSwapChainForHwnd(
+		 device_->GetDxgiFactory()->CreateSwapChainForHwnd(
 			d12_queue->GetNative(), 
 			hwnd_,
 			&desc, 
 			nullptr, 
 			nullptr, 
-			&swap_chain1));
+			&swap_chain1);
+
+		ThrowIfFailed(device_->GetNative()->GetDeviceRemovedReason());
 
 		ComPtr<IDXGISwapChain4> swap_chain4;
 		ThrowIfFailed(swap_chain1.As(&swap_chain4));
@@ -61,21 +98,17 @@ namespace light::rhi
 
 	UINT D12SwapChain::Present()
 	{
-		auto queue = device_->GetCommandQueue(CommandListType::kDirect);
-		auto command_list = queue->GetCommandList();
-
-		//todo
-		queue->ExecuteCommandList(command_list);
+		command_list_->ExecuteCommandList();
 
 		ThrowIfFailed(dxgi_swap_chain_->Present(0, 0));
 
 		// 记录当前的同步量
-		fence_values_[current_back_buffer_index_] = queue->Signal();
+		fence_values_[current_back_buffer_index_] = command_queue_->Signal();
 
 		current_back_buffer_index_ = dxgi_swap_chain_->GetCurrentBackBufferIndex();
 
-		// 等待上一帧完成
-		queue->WaitForFenceValue(fence_values_[current_back_buffer_index_]);
+		// 等待上一帧
+		command_queue_->WaitForFenceValue(fence_values_[current_back_buffer_index_]);
 
 		return current_back_buffer_index_;
 	}
@@ -103,7 +136,7 @@ namespace light::rhi
 	RenderTarget D12SwapChain::GetRenderTarget()
 	{
 		RenderTarget rt;
-		rt.AttacthTexture(AttachmentPoint::kColor0, back_buffer_textures_[current_back_buffer_index_]);
+		rt.AttacthAttachment(AttachmentPoint::kColor0, back_buffer_textures_[current_back_buffer_index_]);
 		return rt;
 	}
 
@@ -114,11 +147,10 @@ namespace light::rhi
 			Handle<ID3D12Resource> back_buffer;
 			ThrowIfFailed(dxgi_swap_chain_->GetBuffer(i, IID_PPV_ARGS(&back_buffer)));
 
-			// todo:
 			TextureDesc desc{};
 			desc.width = width_;
 			desc.height = height_;
-			//GetDesc.format = 
+			desc.format = Format::RGBA8_UNORM;
 #ifdef _DEBUG
 			//todo
 			//desc.debug_name = L"BackBuffer[" + std::to_wstring(i) + L"]";

@@ -56,19 +56,19 @@ namespace light::rhi
 		pso_desc.SampleMask = UINT_MAX;
 		pso_desc.NumRenderTargets = render_target_.GetNumColors();
 
-		const auto& textures = render_target_.GetTextures();
+		const auto& attachments = render_target_.GetAttachments();
 		for (uint32_t i = 0; i < pso_desc.NumRenderTargets; ++i)
 		{
-			if (textures[i])
+			if (attachments[i].texture)
 			{
-				pso_desc.RTVFormats[i] = GetDxgiFormatMapping(textures[i]->GetDesc().format).rtv_format;
+				pso_desc.RTVFormats[i] = GetDxgiFormatMapping(attachments[i].texture->GetDesc().format).rtv_format;
 			}
 		}
 
-		const auto& depth_texture = render_target_.GetTexture(AttachmentPoint::kDepthStencil);
-		if (depth_texture)
+		const auto& depth_attachment = render_target_.GetAttachment(AttachmentPoint::kDepthStencil);
+		if (depth_attachment.texture)
 		{
-			pso_desc.DSVFormat = GetDxgiFormatMapping(depth_texture->GetDesc().format).rtv_format;
+			pso_desc.DSVFormat = GetDxgiFormatMapping(depth_attachment.texture->GetDesc().format).rtv_format;
 		}
 
 		SampleDesc sample_desc = render_target_.GetSampleDesc();

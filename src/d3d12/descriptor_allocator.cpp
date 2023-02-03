@@ -299,6 +299,8 @@ namespace light::rhi
 			auto page = CreateAllocatorPage();
 			allocation = page->Allocate(num_descriptors);
 		}
+
+		return std::move(allocation);
 	}
 
 	void DescriptorAllocator::ReleaseStaleDescriptors()

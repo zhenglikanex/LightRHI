@@ -9,9 +9,13 @@ namespace light::rhi
 {
 	struct TextureDesc
 	{
-		uint32_t width = 0;
-		uint32_t height = 0;
+		uint32_t width = 1;
+		uint32_t height = 1;
+		uint32_t depth = 1;
+		uint32_t array_size = 1;
+		uint32_t mip_levels = 1;
 		Format format = Format::UNKNOWN;
+		TextureDimension dimension = TextureDimension::kTexture2D;
 
 		std::string debug_name;
 	};

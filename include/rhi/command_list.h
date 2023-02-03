@@ -29,7 +29,11 @@ namespace light::rhi
 
 		virtual void ClearTexture(Texture* texture, const float* clear_value) = 0;
 
+		virtual void ClearTexture(Texture* texture, uint32_t mip_level, uint32_t array_slice, uint32_t num_array_slice, const float* clear_value) = 0;
+
 		virtual void ClearDepthStencilTexture(Texture* texture, ClearFlags clear_flags,float depth,uint8_t stencil) = 0;
+
+		virtual void ClearDepthStencilTexture(Texture* texture, uint32_t mip_level, uint32_t array_slice, uint32_t num_array_slice, ClearFlags clear_flags, float depth, uint8_t stencil) = 0;
 
 		virtual void WriteBuffer(Buffer* buffer, const uint8_t* data, uint64_t size, uint64_t dest_offset_bytes = 0) = 0;
 
@@ -50,17 +54,22 @@ namespace light::rhi
 
 		virtual void SetBufferView(uint32_t parameter_index, Buffer* buffer,uint32_t offset = 0, ResourceStates state_after = ResourceStates::kVertexAndConstantBuffer) = 0;
 
-		virtual void SetConstantBufferView(uint32_t parameter_index, uint32_t descriptor_offset, Buffer* buffer, uint32_t offset = 0, ResourceStates state_after = ResourceStates::kVertexAndConstantBuffer) = 0;
+		virtual void SetConstantBufferView(uint32_t parameter_index, uint32_t descriptor_offset, Buffer* buffer, ResourceStates state_after = ResourceStates::kVertexAndConstantBuffer) = 0;
 
-		virtual void SetConstantBufferView(uint32_t parameter_index, uint32_t descriptor_offset, Buffer* buffer, uint32_t offset, uint32_t byte_size, ResourceStates state_after = ResourceStates::kVertexAndConstantBuffer) = 0;
+		virtual void SetStructuredBufferView(uint32_t parameter_index, uint32_t descriptor_offset, Buffer* buffer, uint32_t offset = 0, ResourceStates state_after = ResourceStates::kGenericRead) = 0;
 
-		virtual void SetStructBufferView(uint32_t parameter_index, uint32_t descriptor_offset, Buffer* buffer, uint32_t offset = 0, ResourceStates state_after = ResourceStates::kGenericRead) = 0;
-
-		virtual void SetStructBufferView(uint32_t parameter_index, uint32_t descriptor_offset, Buffer* buffer, uint32_t offset, uint32_t byte_size, ResourceStates state_after = ResourceStates::kGenericRead) = 0;
+		virtual void SetStructuredBufferView(uint32_t parameter_index, uint32_t descriptor_offset, Buffer* buffer, uint32_t offset, uint32_t byte_size, ResourceStates state_after = ResourceStates::kGenericRead) = 0;
 
 		virtual void SetUnoderedAccessBufferView(uint32_t parameter_index, uint32_t descriptor_offset, Buffer* buffer, uint32_t offset = 0, ResourceStates state_after = ResourceStates::kUnorderedAccess) = 0;
 
 		virtual void SetUnoderedAccessBufferView(uint32_t parameter_index, uint32_t descriptor_offset, Buffer* buffer, uint32_t offset, uint32_t byte_size, ResourceStates state_after = ResourceStates::kUnorderedAccess) = 0;
+
+		virtual void SetShaderResourceView(uint32_t parameter_index, uint32_t descriptor_offset, Texture* texture,
+			Format format = Format::UNKNOWN,
+			TextureDimension dimension = TextureDimension::kTexture2D,
+			uint32_t mip_level = 0, uint32_t num_mip_leves = -1,
+			uint32_t array_slice = 0, uint32_t num_array_slices = -1,
+			ResourceStates state_after = ResourceStates::kPixelShaderResource) = 0;
 
 		//virtual void SetShaderResourceView(uint32_t parameter_index,Texture* texture,ResourceStates state_after = ResourceStates::)
 

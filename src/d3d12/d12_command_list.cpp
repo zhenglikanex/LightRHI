@@ -59,6 +59,11 @@ namespace light::rhi
 			d12_buffer->GetNative(),
 			D3D12_RESOURCE_STATE_COMMON,
 			ConvertResourceStates(state_afeter), subresource));
+
+		if(flush_barriers)
+		{
+			FlushResourceBarriers();
+		}
 	}
 
 	void D12CommandList::TransitionBarrier(Texture* texture, ResourceStates state_afeter, uint32_t subresource,
@@ -74,6 +79,11 @@ namespace light::rhi
 			d12_texture->GetNative(),
 			D3D12_RESOURCE_STATE_COMMON,
 			ConvertResourceStates(state_afeter), subresource));
+
+		if(flush_barriers)
+		{
+			FlushResourceBarriers();
+		}
 	}
 
 	void D12CommandList::ClearTexture(Texture* texture, const float* clear_value)
@@ -87,14 +97,40 @@ namespace light::rhi
 		TrackResource(d12_texture);
 	}
 
+	void D12CommandList::ClearTexture(Texture* texture, uint32_t mip_level, uint32_t array_slice,
+		uint32_t num_array_slice, const float* clear_value)
+	{
+		auto d12_texture = CheckedCast<D12Texture*>(texture);
+
+		TransitionBarrier(d12_texture, ResourceStates::kRenderTarget, CalcSubresource(mip_level, array_slice, texture->GetDesc().mip_levels));
+
+		d3d12_command_list_->ClearRenderTargetView(d12_texture->GetRTV(Format::UNKNOWN,mip_level,array_slice,num_array_slice), clear_value, 0, nullptr);
+
+		TrackResource(d12_texture);
+	}
+
 	void D12CommandList::ClearDepthStencilTexture(Texture* texture, ClearFlags clear_flags, float depth,
-		uint8_t stencil)
+	                                              uint8_t stencil)
 	{
 		auto d12_texture = CheckedCast<D12Texture*>(texture);
 
 		TransitionBarrier(d12_texture, ResourceStates::kDepthWrite);
 
 		d3d12_command_list_->ClearDepthStencilView(d12_texture->GetDSV(), ConvertClearFlags(clear_flags), depth, stencil, 0, nullptr);
+
+		TrackResource(d12_texture);
+	}
+
+	void D12CommandList::ClearDepthStencilTexture(Texture* texture, uint32_t mip_level, uint32_t array_slice,
+		uint32_t num_array_slice, ClearFlags clear_flags, float depth, uint8_t stencil)
+	{
+		auto d12_texture = CheckedCast<D12Texture*>(texture);
+
+		TransitionBarrier(d12_texture, ResourceStates::kDepthWrite, CalcSubresource(mip_level, array_slice, texture->GetDesc().mip_levels));
+
+		d3d12_command_list_->ClearDepthStencilView(
+			d12_texture->GetDSV(mip_level, array_slice, num_array_slice), 
+			ConvertClearFlags(clear_flags), depth, stencil, 0, nullptr);
 
 		TrackResource(d12_texture);
 	}
@@ -148,51 +184,65 @@ namespace light::rhi
 		buffer_gpu_virtual_address_[parameter_index] = d12_buffer->GetNative()->GetGPUVirtualAddress() + offset;
 	}
 
-	void D12CommandList::SetConstantBufferView(uint32_t parameter_index, Buffer* buffer, uint32_t offset,
-		ResourceStates state_after)
-	{
-		SetConstantBufferView(parameter_index, buffer, offset, buffer->GetDesc().byte, state_after);
-	}
-
-	void D12CommandList::SetConstantBufferView(uint32_t parameter_index, Buffer* buffer, uint32_t offset,
-		uint32_t byte_size, ResourceStates state_after)
-	{
-		TrackResource(buffer);
-
-		TransitionBarrier(buffer,state_after);
-
-		auto d12_buffer = CheckedCast<D12Buffer*>(buffer);
-		dynamic_descriptor_heaps_[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV]->StageDescriptors() d12_buffer->GetSBV(offset, byte_size);
-
-	}
-
-	void D12CommandList::SetStructBufferView(uint32_t parameter_index, Buffer* buffer, uint32_t offset,
-		uint32_t byte_size, ResourceStates state_after)
-	{
-	}
-
-	void D12CommandList::SetBuffer(uint32_t parameter_index, Buffer* buffer, ResourceStates state_after)
-	{
-		
-	}
-
-	void D12CommandList::SetConstantBufferView(uint32_t parameter_index, Buffer* buffer, ResourceStates state_after)
+	void D12CommandList::SetConstantBufferView(uint32_t parameter_index, uint32_t descriptor_offset, Buffer* buffer,ResourceStates state_after)
 	{
 		TrackResource(buffer);
 
 		TransitionBarrier(buffer, state_after);
 
 		auto d12_buffer = CheckedCast<D12Buffer*>(buffer);
-		dynamic_descriptor_heaps_[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV]->StageDescriptors(parameter_index,0,1,)
+		dynamic_descriptor_heaps_[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV]->StageDescriptors(
+			parameter_index,descriptor_offset,1,d12_buffer->GetCBV());
 	}
 
-	void D12CommandList::SetStructBufferView(uint32_t parameter_index, Buffer* buffer, ResourceStates state_after)
+	void D12CommandList::SetStructuredBufferView(uint32_t parameter_index, uint32_t descriptor_offset, Buffer* buffer,
+		uint32_t offset, ResourceStates state_after)
 	{
+		SetStructuredBufferView(parameter_index, descriptor_offset, buffer, offset, buffer->GetDesc().byte, state_after);
 	}
 
-	void D12CommandList::SetUnoderedAccessBufferView(uint32_t parameter_index, Buffer* buffer,
-		ResourceStates state_after)
+	void D12CommandList::SetStructuredBufferView(uint32_t parameter_index, uint32_t descriptor_offset, Buffer* buffer,
+		uint32_t offset, uint32_t byte_size, ResourceStates state_after)
 	{
+		TrackResource(buffer);
+
+		TransitionBarrier(buffer, state_after);
+
+		auto d12_buffer = CheckedCast<D12Buffer*>(buffer);
+		dynamic_descriptor_heaps_[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV]->StageDescriptors(
+			parameter_index, descriptor_offset, 1, d12_buffer->GetSBV(offset, byte_size));
+	}
+
+	void D12CommandList::SetUnoderedAccessBufferView(uint32_t parameter_index, uint32_t descriptor_offset,
+		Buffer* buffer, uint32_t offset, ResourceStates state_after)
+	{
+		SetUnoderedAccessBufferView(parameter_index, descriptor_offset, buffer, offset, buffer->GetDesc().byte, state_after);
+	}
+
+	void D12CommandList::SetUnoderedAccessBufferView(uint32_t parameter_index, uint32_t descriptor_offset,
+		Buffer* buffer, uint32_t offset, uint32_t byte_size, ResourceStates state_after)
+	{
+		TrackResource(buffer);
+
+		TransitionBarrier(buffer, state_after);
+
+		auto d12_buffer = CheckedCast<D12Buffer*>(buffer);
+		dynamic_descriptor_heaps_[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV]->StageDescriptors(
+			parameter_index, descriptor_offset, 1, d12_buffer->GetUBV(offset, byte_size));
+	}
+
+	void D12CommandList::SetShaderResourceView(uint32_t parameter_index, uint32_t descriptor_offset, Texture* texture,
+		Format format, TextureDimension dimension, uint32_t mip_level, uint32_t num_mip_leves, uint32_t array_slice,
+		uint32_t num_array_slices, ResourceStates state_after)
+	{
+		TrackResource(texture);
+		
+		TransitionBarrier(texture, state_after);
+
+		auto d12_texture = CheckedCast<D12Texture*>(texture);
+		dynamic_descriptor_heaps_[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV]->StageDescriptors(
+			parameter_index, descriptor_offset, 1,
+			d12_texture->GetSRV(format, dimension, mip_level, num_mip_leves, array_slice, num_array_slices));
 	}
 
 	void D12CommandList::SetGraphicsPipeline(GraphicsPipeline* pso)
@@ -236,7 +286,7 @@ namespace light::rhi
 		D3D12_INDEX_BUFFER_VIEW view{};
 		view.BufferLocation = d12_buffer->GetNative()->GetGPUVirtualAddress();
 		view.SizeInBytes = static_cast<UINT>(desc.byte);
-		//view.Format = 
+		view.Format = GetDxgiFormatMapping(buffer->GetDesc().format).srv_format;
 		d3d12_command_list_->IASetIndexBuffer(&view);
 	}
 
@@ -244,19 +294,27 @@ namespace light::rhi
 	{
 		std::array<D3D12_CPU_DESCRIPTOR_HANDLE,static_cast<uint32_t>(AttachmentPoint::kNumAttachmentPoints)> render_target_descriptors{};
 		uint32_t num_render_target = 0;
-		const auto& textures = render_target.GetTextures();
+		const auto& textures = render_target.GetAttachments();
 
 		//≤È’“À˘”–color target
 		for (uint32_t i = 0; i < static_cast<uint32_t>(AttachmentPoint::kDepthStencil); ++i)
 		{
-			const auto& texture = textures[i];
-			if (texture)
+			const auto& attachment = textures[i];
+			if (attachment.texture)
 			{
-				auto d12_texture = CheckedCast<D12Texture*>(texture.Get());
+				auto d12_texture = CheckedCast<D12Texture*>(attachment.texture.Get());
 
 				TransitionBarrier(d12_texture, ResourceStates::kRenderTarget);
 
-				render_target_descriptors[num_render_target++] = d12_texture->GetRTV();
+				if(attachment.IsAllSubresource())
+				{
+					render_target_descriptors[num_render_target++] = d12_texture->GetRTV();
+				}
+				else
+				{
+					render_target_descriptors[num_render_target++] = 
+						d12_texture->GetRTV(attachment.format, attachment.mip_level, attachment.array_slice, attachment.num_array_slice);
+				}
 
 				TrackResource(d12_texture);
 			}
@@ -264,14 +322,21 @@ namespace light::rhi
 
 		D3D12_CPU_DESCRIPTOR_HANDLE depth_stencil_descriptor{0};
 
-		const auto& depth_texture = render_target.GetTexture(AttachmentPoint::kDepthStencil);
-		if(depth_texture)
+		const auto& attachment = render_target.GetAttachment(AttachmentPoint::kDepthStencil);
+		if(attachment.texture)
 		{
-			auto d12_depth_texture = CheckedCast<D12Texture*>(depth_texture.Get());
+			auto d12_depth_texture = CheckedCast<D12Texture*>(attachment.texture.Get());
 
 			TransitionBarrier(d12_depth_texture, ResourceStates::kDepthWrite);
 
-			depth_stencil_descriptor = d12_depth_texture->GetDSV();
+			if(attachment.IsAllSubresource())
+			{
+				depth_stencil_descriptor = d12_depth_texture->GetDSV();
+			}
+			else
+			{
+				depth_stencil_descriptor = d12_depth_texture->GetDSV(attachment.mip_level, attachment.array_slice, attachment.num_array_slice);
+			}
 
 			TrackResource(d12_depth_texture);
 		}

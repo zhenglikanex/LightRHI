@@ -19,13 +19,42 @@ namespace light::rhi
 
 			std::wstring msg = err.ErrorMessage();
 			std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-
+			
 			throw std::exception(converter.to_bytes(msg).c_str());
 		}
 	}
 
 	D12Device::D12Device()
 	{
+#if defined(DEBUG) || defined(_DEBUG)
+		{
+			Handle<ID3D12Debug> debug_controller;
+			ThrowIfFailed(D3D12GetDebugInterface(IID_PPV_ARGS(&debug_controller)));
+			debug_controller->EnableDebugLayer();
+		}
+#endif
+
+		Microsoft::WRL::ComPtr<IDXGIFactory> dxgi_factory;
+		ThrowIfFailed(CreateDXGIFactory(IID_PPV_ARGS(&dxgi_factory)));
+
+		ThrowIfFailed(dxgi_factory.As(&dxgi_factory_));
+
+		//try to create hardware device
+		HRESULT rt = D3D12CreateDevice(
+			nullptr,			// default adapter
+			D3D_FEATURE_LEVEL_11_0,
+			IID_PPV_ARGS(&device_));
+
+		// Fallback to WARP device
+		if (FAILED(rt))
+		{
+			// ªÿÕÀµΩ»Ì‰÷»æ∆˜
+			Handle<IDXGIAdapter> warp_adapter;
+			ThrowIfFailed(dxgi_factory_->EnumWarpAdapter(IID_PPV_ARGS(&warp_adapter)));
+
+			ThrowIfFailed(D3D12CreateDevice(warp_adapter.Get(), D3D_FEATURE_LEVEL_11_0, IID_PPV_ARGS(&device_)));
+		}
+
 		queues_[static_cast<size_t>(CommandListType::kDirect)] = MakeHandle<D12CommandQueue>(this, CommandListType::kDirect);
 		queues_[static_cast<size_t>(CommandListType::kCompute)] = MakeHandle<D12CommandQueue>(this, CommandListType::kCompute);
 		queues_[static_cast<size_t>(CommandListType::kCopy)] = MakeHandle<D12CommandQueue>(this, CommandListType::kCopy);
@@ -35,6 +64,7 @@ namespace light::rhi
 			descriptor_allocators_[i] = 
 				std::make_unique<DescriptorAllocator>(this, static_cast<D3D12_DESCRIPTOR_HEAP_TYPE>(i));
 		}
+
 	}
 
 	SwapChainHandle D12Device::CreateSwapChian(HWND hwnd)
@@ -52,12 +82,12 @@ namespace light::rhi
 		return MakeHandle<D12Buffer>(this,desc);
 	}
 
-	TextureHandle D12Device::CreateTexture(TextureDesc desc)
+	TextureHandle D12Device::CreateTexture(const TextureDesc& desc)
 	{
 		return MakeHandle<D12Texture>(this, desc);
 	}
 
-	TextureHandle D12Device::CreateTextureForNative(TextureDesc desc, void* resource)
+	TextureHandle D12Device::CreateTextureForNative(const TextureDesc& desc, void* resource)
 	{
 		return MakeHandle<D12Texture>(this, desc, static_cast<ID3D12Resource*>(resource));
 	}

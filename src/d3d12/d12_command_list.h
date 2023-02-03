@@ -31,7 +31,13 @@ namespace light::rhi
 
 		void ClearTexture(Texture* texture, const float* clear_value) override;
 
+		void ClearTexture(Texture* texture, uint32_t mip_level, uint32_t array_slice, uint32_t num_array_slice,
+			const float* clear_value) override;
+
 		void ClearDepthStencilTexture(Texture* texture, ClearFlags clear_flags, float depth, uint8_t stencil) override;
+
+		void ClearDepthStencilTexture(Texture* texture, uint32_t mip_level, uint32_t array_slice,
+			uint32_t num_array_slice, ClearFlags clear_flags, float depth, uint8_t stencil) override;
 
 		void WriteBuffer(Buffer* buffer, const uint8_t* data, uint64_t size, uint64_t dest_offset_bytes = 0) override;
 
@@ -41,18 +47,23 @@ namespace light::rhi
 
 		void SetBufferView(uint32_t parameter_index, Buffer* buffer, uint32_t offset, ResourceStates state_after) override;
 
-		void SetConstantBufferView(uint32_t parameter_index, Buffer* buffer, uint32_t offset,
-			ResourceStates state_after) override;
+		void SetConstantBufferView(uint32_t parameter_index, uint32_t descriptor_offset, Buffer* buffer,ResourceStates state_after) override;
 
-		void SetConstantBufferView(uint32_t parameter_index,uint32_t descriptor_offset, Buffer* buffer, uint32_t offset, uint32_t byte_size,
-			ResourceStates state_after) override;
+		void SetStructuredBufferView(uint32_t parameter_index, uint32_t descriptor_offset, Buffer* buffer,
+			uint32_t offset, ResourceStates state_after) override;
 
-		void SetStructBufferView(uint32_t parameter_index, Buffer* buffer, uint32_t offset, uint32_t byte_size,
-			ResourceStates state_after) override;
+		void SetStructuredBufferView(uint32_t parameter_index, uint32_t descriptor_offset, Buffer* buffer,
+			uint32_t offset, uint32_t byte_size, ResourceStates state_after) override;
 
-		void SetStructBufferView(uint32_t parameter_index, Buffer* buffer, ResourceStates state_after) override;
+		void SetUnoderedAccessBufferView(uint32_t parameter_index, uint32_t descriptor_offset, Buffer* buffer,
+			uint32_t offset, ResourceStates state_after) override;
 
-		void SetUnoderedAccessBufferView(uint32_t parameter_index, Buffer* buffer, ResourceStates state_after) override;
+		void SetUnoderedAccessBufferView(uint32_t parameter_index, uint32_t descriptor_offset, Buffer* buffer,
+			uint32_t offset, uint32_t byte_size, ResourceStates state_after) override;
+
+		void SetShaderResourceView(uint32_t parameter_index, uint32_t descriptor_offset, Texture* texture,
+			Format format, TextureDimension dimension, uint32_t mip_level, uint32_t num_mip_leves, uint32_t array_slice,
+			uint32_t num_array_slices, ResourceStates state_after) override;
 
 		void SetGraphicsPipeline(GraphicsPipeline* pso) override;
 
@@ -92,6 +103,7 @@ namespace light::rhi
 		void FlushResourceBarriers() override;
 	public:
 		
+
 
 	private:
 		D12Device* device_;

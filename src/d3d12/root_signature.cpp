@@ -35,8 +35,6 @@ namespace light::rhi
 					range.BaseShaderRegister = in.descriptor_table.descriptor_ranges[i].base_shader_register;
 					range.RegisterSpace = in.descriptor_table.descriptor_ranges[i].register_space;
 					range.OffsetInDescriptorsFromTableStart = in.descriptor_table.descriptor_ranges[i].offset_in_descriptors_from_table_start;
-
-					
 				}
 
 				out.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
@@ -84,7 +82,7 @@ namespace light::rhi
 			flag |= D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 		}
 
-		//todo:
+		//todo:RootSignature°æ±¾?
 		CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rs_desc{};
 		rs_desc.Init_1_1(root_parameters.size(), root_parameters.data(), 0, nullptr, flag);
 

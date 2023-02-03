@@ -53,7 +53,7 @@ namespace light::rhi
 		D3D12_CPU_DESCRIPTOR_HANDLE descriptor_;
 		uint32_t num_handles_;
 		uint32_t descriptor_size_;
-		Handle<DescriptorAllocatorPage> page_;
+		DescriptorAllocatorPage* page_;
 	};
 
 	class DescriptorAllocatorPage
@@ -71,7 +71,7 @@ namespace light::rhi
 		void Free(DescriptorAllocation&& allocation);
 
 		void ReleaseStaleDescriptors();
-	private:
+
 		DescriptorAllocatorPage(D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t num_descriptors);
 
 		// 计算对于Handle对于Heap起始位置的偏移

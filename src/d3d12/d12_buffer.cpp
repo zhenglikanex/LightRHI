@@ -30,7 +30,7 @@ namespace light::rhi
 			&heap_properties,
 			D3D12_HEAP_FLAG_NONE,
 			&d12_desc,
-			ConvertResourceState(desc.initial_state),
+			D3D12_RESOURCE_STATE_COMMON,
 			nullptr,
 			IID_PPV_ARGS(&resource_)));
 
@@ -59,11 +59,6 @@ namespace light::rhi
 		return cbv_.GetDescriptorHandle();
 	}
 
-	D3D12_CPU_DESCRIPTOR_HANDLE D12Buffer::GetSBV(uint32_t offset)
-	{
-		return GetSBV(offset, desc_.byte);
-	}
-
 	D3D12_CPU_DESCRIPTOR_HANDLE D12Buffer::GetSBV(uint32_t offset, uint32_t byte_size)
 	{
 		size_t hash = 0;
@@ -81,6 +76,8 @@ namespace light::rhi
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc{};
 		srv_desc.Format = DXGI_FORMAT_UNKNOWN;
+		srv_desc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+		srv_desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 		srv_desc.Buffer.FirstElement = offset / desc_.stride;
 		srv_desc.Buffer.NumElements = byte_size / desc_.stride;
 		srv_desc.Buffer.StructureByteStride = desc_.stride;
@@ -92,20 +89,36 @@ namespace light::rhi
 		return sbv_map_[hash].GetDescriptorHandle();
 	}
 
-	D3D12_CPU_DESCRIPTOR_HANDLE D12Buffer::GetUBV()
+	D3D12_CPU_DESCRIPTOR_HANDLE D12Buffer::GetUBV(uint32_t offset, uint32_t byte_size)
 	{
-		
-	}
+		// todo
+		assert(desc_.is_uav && "is not uav");
 
-	void D12Buffer::CreateCBV()
-	{
-	}
+		size_t hash = 0;
 
-	void D12Buffer::CreateSBV()
-	{
-	}
+		HashCombine(hash, offset);
+		HashCombine(hash, byte_size);
 
-	void D12Buffer::CreateUBV()
-	{
+		auto it = ubv_map_.find(hash);
+		if (it != ubv_map_.end())
+		{
+			return it->second.GetDescriptorHandle();
+		}
+
+		DescriptorAllocation descriptor_allocation = device_->AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 1);
+
+		D3D12_UNORDERED_ACCESS_VIEW_DESC uav_desc{};
+		uav_desc.Format = DXGI_FORMAT_UNKNOWN;
+		uav_desc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
+		uav_desc.Buffer.FirstElement = offset / desc_.stride;
+		uav_desc.Buffer.NumElements = byte_size / desc_.stride;
+		uav_desc.Buffer.StructureByteStride = desc_.stride;
+		uav_desc.Buffer.CounterOffsetInBytes = 0;
+
+		device_->GetNative()->CreateUnorderedAccessView(resource_,nullptr,&uav_desc, descriptor_allocation.GetDescriptorHandle());
+
+		ubv_map_.emplace(hash, std::move(descriptor_allocation));
+
+		return ubv_map_[hash].GetDescriptorHandle();
 	}
 }

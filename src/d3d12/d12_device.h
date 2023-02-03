@@ -4,8 +4,6 @@
 
 #include "rhi/device.h"
 
-#include <dxgi1_5.h>
-#include "d3dx12.h"
 #include "d12_convert.h"
 #include "d12_command_list.h"
 #include "d12_command_queue.h"
@@ -16,9 +14,16 @@
 #include "root_signature.h"
 #include "descriptor_allocator.h"
 
+#include <dxgi1_5.h>
+#include <wrl/client.h>
+
+#pragma comment(lib,"d3dcompiler.lib")
+#pragma comment(lib,"D3D12.lib")
+#pragma comment(lib,"dxgi.lib")
+
 namespace light::rhi
 {
-	constexpr uint64_t kConstantAlignSize = 256ull;
+	constexpr uint32_t kConstantAlignSize = 256ull;
 
 	inline void ThrowIfFailed(HRESULT hr);
 	
@@ -38,9 +43,9 @@ namespace light::rhi
 
 		BufferHandle CreateBuffer(BufferDesc desc) override;
 
-		TextureHandle CreateTexture(TextureDesc desc) override;
+		TextureHandle CreateTexture(const TextureDesc& desc) override;
 
-		TextureHandle CreateTextureForNative(TextureDesc desc, void* resource) override;
+		TextureHandle CreateTextureForNative(const TextureDesc& desc, void* resource) override;
 
 		InputLayoutHandle CreateInputLayout(std::vector<VertexAttributeDesc> attributes) override;
 
@@ -50,7 +55,7 @@ namespace light::rhi
 
 		CommandList* GetCommandList(CommandListType type) override;
 
-		IDXGIFactory5* GetDxgiFactory() { return dxgi_factory_; }
+		IDXGIFactory5* GetDxgiFactory() { return dxgi_factory_.Get(); }
 
 		RootSignatureHandle GetRootSignature(BindingLayout* binding_layout, bool allow_input_layout);
 
@@ -65,7 +70,7 @@ namespace light::rhi
 		uint32_t GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE type) const;
 	private:
 		Handle<ID3D12Device> device_;
-		Handle<IDXGIFactory5> dxgi_factory_;
+		Microsoft::WRL::ComPtr<IDXGIFactory5> dxgi_factory_;
 		std::array<Handle<D12CommandQueue>, static_cast<size_t>(CommandListType::kCopy) + 1> queues_;
 		std::unordered_map<size_t, RootSignature*> root_signature_cache_;
 		std::array<std::unique_ptr<DescriptorAllocator>, D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES> descriptor_allocators_;

@@ -57,6 +57,21 @@ namespace light::rhi
 		kConstant,
 	};
 
+	enum class TextureDimension : uint8_t
+	{
+		kUnknown,
+		kTexture1D,
+		kTexture1DArray,
+		kTexture2D,
+		kTexture2DArray,
+		kTextureCube,
+		kTextureCubeArray,
+		kTexture2DMS,
+		kTexture2DMSArray,
+		kTexture3D
+	};
+
+
 	enum class CommandListType : uint8_t
 	{
 		kDirect = 0,

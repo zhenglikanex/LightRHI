@@ -21,6 +21,21 @@ namespace light::rhi
 		kNumAttachmentPoints
 	};
 
+	struct Attachment
+	{
+		TextureHandle texture = nullptr;
+
+		Format format = Format::UNKNOWN;
+		uint32_t mip_level = -1;
+		uint32_t array_slice = -1;
+		uint32_t num_array_slice = -1;
+
+		bool IsAllSubresource() const
+		{
+			return mip_level == -1 && array_slice == -1 && num_array_slice == -1;
+		}
+	};
+
 	class RenderTarget
 	{
 	public:
@@ -33,13 +48,15 @@ namespace light::rhi
 		RenderTarget(RenderTarget&&) = default;
 		RenderTarget& operator=(RenderTarget&&) = default;
 
-		using TextureHandleArray = std::array<TextureHandle, static_cast<uint32_t>(AttachmentPoint::kNumAttachmentPoints)>;
+		using AttachmentArray = std::array<Attachment, static_cast<uint32_t>(AttachmentPoint::kNumAttachmentPoints)>;
 
-		void AttacthTexture(AttachmentPoint attachment_point, TextureHandle texture);
+		void AttacthAttachment(AttachmentPoint attachment_point, TextureHandle texture);
 
-		TextureHandle GetTexture(AttachmentPoint attachment_point) const;
+		void AttacthAttachment(AttachmentPoint attachment_point, TextureHandle texture, uint32_t mip_level,uint32_t array_slice = 0);
 
-		const TextureHandleArray& GetTextures() const { return textures_; }
+		Attachment GetAttachment(AttachmentPoint attachment_point) const;
+
+		const AttachmentArray& GetAttachments() const { return attachments_; }
 		
 		uint32_t GetWidth() const;
 
@@ -52,6 +69,6 @@ namespace light::rhi
 		SampleDesc GetSampleDesc() const;
 
 	private:
-		TextureHandleArray textures_;
+		AttachmentArray attachments_;
 	};
 }

@@ -11,9 +11,7 @@ namespace light::rhi
 	{
 		BufferType type = BufferType::kUnknown;
 		CpuAccess cpu_access = CpuAccess::kNone;
-
-		ResourceStates initial_state = ResourceStates::kCommon;
-
+		Format format = Format::UNKNOWN;
 		bool is_uav = false;
 		uint32_t stride = 0;
 		uint32_t byte = 0;

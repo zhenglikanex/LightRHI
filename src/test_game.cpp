@@ -41,7 +41,7 @@ public:
 		GraphicsPipelineDesc pso_desc;
 		pso_desc.input_layout = device_->CreateInputLayout(std::move(vertex_attributes));
 
-		pso_ = device_->CreateGraphicsPipeline(pso_desc,rt);
+		//pso_ = device_->CreateGraphicsPipeline(pso_desc,rt);
 
 		return true;
 	}
@@ -59,8 +59,7 @@ public:
 		float clear_color[] = { 1.0, 0.0, 0.0, 1.0 };
 		command_list->ClearTexture(rt.GetAttachment(AttachmentPoint::kColor0).texture,clear_color);
 
-		command_list->SetGraphicsPipeline(pso_);
-
+		//command_list->SetGraphicsPipeline(pso_);
 		command_list->ExecuteCommandList();
 
 		swap_chain_->Present();

@@ -9,6 +9,14 @@ namespace light::rhi
 		, device_(device)
 		, resource_(nullptr)
 	{
+		auto heap = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+		auto res_desc = CD3DX12_RESOURCE_DESC::Tex2D(GetDxgiFormatMapping(desc.format).rtv_format, desc.width, desc.height, desc.array_size, desc.mip_levels);
+		res_desc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+		D3D12_CLEAR_VALUE optClear;
+		optClear.Format = GetDxgiFormatMapping(desc.format).rtv_format;
+		optClear.DepthStencil.Depth = 1.0f;
+		optClear.DepthStencil.Stencil = 0;
+		device_->GetNative()->CreateCommittedResource(&heap, D3D12_HEAP_FLAG_NONE, &res_desc, D3D12_RESOURCE_STATE_COMMON, &optClear, IID_PPV_ARGS(&resource_));
 	}
 
 	D12Texture::D12Texture(D12Device* device, const TextureDesc& desc, ID3D12Resource* native)
@@ -29,7 +37,7 @@ namespace light::rhi
 			return it->second.GetDescriptorHandle();
 		}
 
-		DescriptorAllocation allocation = device_->AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 1);
+		DescriptorAllocation allocation = device_->AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 1);
 		D3D12_CPU_DESCRIPTOR_HANDLE handle = allocation.GetDescriptorHandle();
 		device_->GetNative()->CreateRenderTargetView(resource_, nullptr, handle);
 		rtv_map_.emplace(hash, std::move(allocation));
@@ -104,7 +112,7 @@ namespace light::rhi
 			assert(false);
 		}
 
-		DescriptorAllocation allocation = device_->AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 1);
+		DescriptorAllocation allocation = device_->AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 1);
 		D3D12_CPU_DESCRIPTOR_HANDLE handle = allocation.GetDescriptorHandle();
 		device_->GetNative()->CreateRenderTargetView(resource_, &rtv_desc, handle);
 		rtv_map_.emplace(hash, std::move(allocation));
@@ -122,7 +130,7 @@ namespace light::rhi
 			return it->second.GetDescriptorHandle();
 		}
 
-		DescriptorAllocation allocation = device_->AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 1);
+		DescriptorAllocation allocation = device_->AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1);
 		D3D12_CPU_DESCRIPTOR_HANDLE handle = allocation.GetDescriptorHandle();
 		device_->GetNative()->CreateDepthStencilView(resource_,nullptr, handle);
 		dsv_map_.emplace(hash, std::move(allocation));
@@ -187,7 +195,7 @@ namespace light::rhi
 			assert(false);
 		}
 
-		DescriptorAllocation allocation = device_->AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 1);
+		DescriptorAllocation allocation = device_->AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1);
 		D3D12_CPU_DESCRIPTOR_HANDLE handle = allocation.GetDescriptorHandle();
 		device_->GetNative()->CreateDepthStencilView(resource_, &dsv_desc, handle);
 		dsv_map_.emplace(hash, std::move(allocation));

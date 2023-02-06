@@ -21,10 +21,10 @@ namespace light::rhi
 			nullptr, 
 			IID_PPV_ARGS(&d3d12_command_list_)));
 
-		for (size_t type = 0; type <= D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES; ++type)
+		for (size_t i = 0; i < D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES; ++i)
 		{
-			dynamic_descriptor_heaps_[type] = std::make_unique<DynamicDescriptorHeap>(device_, static_cast<D3D12_DESCRIPTOR_HEAP_TYPE>(type));
-			descriptr_heaps_[type] = nullptr;
+			dynamic_descriptor_heaps_[i] = std::make_unique<DynamicDescriptorHeap>(device_, static_cast<D3D12_DESCRIPTOR_HEAP_TYPE>(i));
+			descriptr_heaps_[i] = nullptr;
 		}
 
 		for (size_t i = 0; i < 32; ++i)
@@ -95,6 +95,8 @@ namespace light::rhi
 		d3d12_command_list_->ClearRenderTargetView(d12_texture->GetRTV(), clear_value, 0, nullptr);
 
 		TrackResource(d12_texture);
+
+		ThrowIfFailed(device_->GetNative()->GetDeviceRemovedReason());
 	}
 
 	void D12CommandList::ClearTexture(Texture* texture, uint32_t mip_level, uint32_t array_slice,
@@ -252,7 +254,6 @@ namespace light::rhi
 			auto d12_pso = CheckedCast<D12GraphicsPipeline*>(pso);
 
 			d3d12_command_list_->SetGraphicsRootSignature(d12_pso->GetRootSignature());
-
 			d3d12_command_list_->SetPipelineState(d12_pso->GetNative());
 
 			TrackResource(pso);
@@ -343,11 +344,13 @@ namespace light::rhi
 
 		D3D12_CPU_DESCRIPTOR_HANDLE* dsv = depth_stencil_descriptor.ptr != 0 ? &depth_stencil_descriptor : nullptr;
 		d3d12_command_list_->OMSetRenderTargets(num_render_target, render_target_descriptors.data(), false, dsv);
+
+		ThrowIfFailed(device_->GetNative()->GetDeviceRemovedReason());
 	}
 
 	void D12CommandList::SetViewport(const Viewport& viewport)
 	{
-		SetViewport({ viewport });
+		SetViewports({ viewport });
 	}
 
 	void D12CommandList::SetViewports(const std::vector<Viewport>& viewports)
@@ -361,6 +364,8 @@ namespace light::rhi
 		}
 
 		d3d12_command_list_->RSSetViewports(d12_viewports.size(), d12_viewports.data());
+
+		ThrowIfFailed(device_->GetNative()->GetDeviceRemovedReason());
 	}
 
 	void D12CommandList::SetScissorRect(const Rect& rect)
@@ -379,11 +384,15 @@ namespace light::rhi
 		}
 
 		d3d12_command_list_->RSSetScissorRects(d12_rects.size(), d12_rects.data());
+
+		ThrowIfFailed(device_->GetNative()->GetDeviceRemovedReason());
 	}
 
 	void D12CommandList::ExecuteCommandList()
 	{
 		queue_->ExecuteCommandList(this);
+
+		ThrowIfFailed(device_->GetNative()->GetDeviceRemovedReason());
 	}
 
 	bool D12CommandList::Close(CommandList* pending_command_list)
@@ -396,6 +405,8 @@ namespace light::rhi
 
 		// 提交最终资源导全局状态
 		resource_state_tracker_.CommitFinalResourceStates();
+
+		d3d12_command_list_->Close();
 
 		return num_pending_barries > 0;
 	}

@@ -18,6 +18,8 @@ namespace light::rhi
 		command_queue_ = device_->GetCommandQueue(CommandListType::kDirect);
 		command_list_ = device_->GetCommandList(CommandListType::kDirect);
 
+		auto d12_queue = CheckedCast<D12CommandQueue*>(command_queue_);
+
 		RECT window_rect;
 		::GetClientRect(hwnd_, &window_rect);
 
@@ -25,12 +27,10 @@ namespace light::rhi
 		height_ = window_rect.bottom - window_rect.top;
 
 		bool allow_tearing = false;
-		/*if (SUCCEEDED(device_->GetDxgiFactory()->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allow_tearing, sizeof(bool))))
+		if (SUCCEEDED(device_->GetDxgiFactory()->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &allow_tearing, sizeof(bool))))
 		{
 			allow_tearing = true;
-		}*/
-
-		
+		}
 
 		DXGI_SWAP_CHAIN_DESC1 desc{};
 		desc.Width = width_;
@@ -47,34 +47,6 @@ namespace light::rhi
 		desc.Flags = allow_tearing ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
 		desc.Flags |= DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
 
-		CommandQueue* queue = device_->GetCommandQueue(CommandListType::kDirect);
-		auto d12_queue = CheckedCast<D12CommandQueue*>(queue);
-		IDXGIFactory* factory;
-
-		DXGI_SWAP_CHAIN_DESC sd;
-		sd.BufferDesc.Width = width_;
-		sd.BufferDesc.Height = height_;
-		sd.BufferDesc.RefreshRate.Numerator = 60;
-		sd.BufferDesc.RefreshRate.Denominator = 1;
-		sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		sd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-		sd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-		sd.SampleDesc.Count = 1;
-		sd.SampleDesc.Quality = 0;
-		sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		sd.BufferCount = 2;
-		sd.OutputWindow = hwnd_;
-		sd.Windowed = true;
-		sd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-		sd.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH;
-
-		// 注意交换链需要通过命令队列进行刷新
-		ComPtr<IDXGISwapChain> swap_chain;
-		ThrowIfFailed(device_->GetDxgiFactory()->CreateSwapChain(
-			d12_queue->GetNative(),
-			&sd,
-			swap_chain.GetAddressOf()));
-
 		ComPtr<IDXGISwapChain1> swap_chain1;
 		 device_->GetDxgiFactory()->CreateSwapChainForHwnd(
 			d12_queue->GetNative(), 
@@ -83,8 +55,6 @@ namespace light::rhi
 			nullptr, 
 			nullptr, 
 			&swap_chain1);
-
-		ThrowIfFailed(device_->GetNative()->GetDeviceRemovedReason());
 
 		ComPtr<IDXGISwapChain4> swap_chain4;
 		ThrowIfFailed(swap_chain1.As(&swap_chain4));
@@ -98,8 +68,8 @@ namespace light::rhi
 
 	UINT D12SwapChain::Present()
 	{
-		command_list_->ExecuteCommandList();
-
+		//command_list_->ExecuteCommandList();
+		ThrowIfFailed(device_->GetNative()->GetDeviceRemovedReason());
 		ThrowIfFailed(dxgi_swap_chain_->Present(0, 0));
 
 		// 记录当前的同步量

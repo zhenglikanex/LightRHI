@@ -59,12 +59,13 @@ namespace light::rhi
 		queues_[static_cast<size_t>(CommandListType::kCompute)] = MakeHandle<D12CommandQueue>(this, CommandListType::kCompute);
 		queues_[static_cast<size_t>(CommandListType::kCopy)] = MakeHandle<D12CommandQueue>(this, CommandListType::kCopy);
 
+		ThrowIfFailed(device_->GetDeviceRemovedReason());
+
 		for (int i = 0; i < D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES; ++i)
 		{
 			descriptor_allocators_[i] = 
 				std::make_unique<DescriptorAllocator>(this, static_cast<D3D12_DESCRIPTOR_HEAP_TYPE>(i));
 		}
-
 	}
 
 	SwapChainHandle D12Device::CreateSwapChian(HWND hwnd)

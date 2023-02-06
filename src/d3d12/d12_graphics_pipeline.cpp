@@ -74,5 +74,7 @@ namespace light::rhi
 		SampleDesc sample_desc = render_target_.GetSampleDesc();
 		pso_desc.SampleDesc.Count = sample_desc.count;
 		pso_desc.SampleDesc.Quality = sample_desc.quality;
+
+		ThrowIfFailed(device->GetNative()->CreateGraphicsPipelineState(&pso_desc, IID_PPV_ARGS(&pipeline_state_)));
 	}
 }

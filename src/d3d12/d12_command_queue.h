@@ -2,13 +2,14 @@
 
 #include <vector>
 #include <atomic>
-#include "d3dx12.h"
+#include <thread>
 
 #include "rhi/thread_safe_queue.hpp"
 #include "rhi/command_queue.h"
 #include "rhi/command_list.h"
 
 #include "d12_command_list.h"
+
 
 namespace light::rhi
 {
@@ -34,8 +35,9 @@ namespace light::rhi
 
 		uint64_t ExecuteCommandLists(uint64_t num, CommandList* command_lists) override;
 
-		ID3D12CommandQueue* GetNative() { return queue_; }
+		void ProcessCommandLists() override;
 
+		ID3D12CommandQueue* GetNative() { return queue_; }
 	private:
 		struct CommandListEntry
 		{
@@ -45,12 +47,14 @@ namespace light::rhi
 
 		D12Device* device_;
 		Handle<ID3D12CommandQueue> queue_;
-		ThreadSafeQueue<Handle<D12CommandList>> available_command_lists_;
+		ThreadSafeQueue<Handle<CommandList>> available_command_lists_;
 		ThreadSafeQueue<CommandListEntry> flight_command_lists_;
 		Handle<ID3D12Fence> fence_;
 		std::atomic_uint64_t fence_value_;
+		bool run_;
 		std::mutex mutex_;
 		std::condition_variable condition_;
+		std::thread command_thread_;
 	};
 
 }

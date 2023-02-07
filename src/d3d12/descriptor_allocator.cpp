@@ -323,7 +323,7 @@ namespace light::rhi
 		auto page = std::make_unique<DescriptorAllocatorPage>(device_, heap_type_, page_size_);
 		pages_.push_back(std::move(page));
 
-		available_pages_.insert(pages_.size());
+		available_pages_.insert(pages_.size() - 1);
 
 		return pages_.back().get();
 	}

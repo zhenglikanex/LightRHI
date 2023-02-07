@@ -113,25 +113,8 @@ namespace light::rhi
 			}
 			else
 			{
-				if (pending_barrier.Transition.Subresource == D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES &&
-					!it->second.subresource_state.empty())
-				{
-					for (auto subresource_state : it->second.subresource_state)
-					{
-						if (pending_barrier.Transition.StateAfter != subresource_state.second)
-						{
-							D3D12_RESOURCE_BARRIER barrier = pending_barrier;
-							barrier.Transition.StateBefore = subresource_state.second;
-							resource_barriers.push_back(barrier);
-						}
-					}
-				}
-				else
-				{
-					D3D12_RESOURCE_BARRIER barrier = pending_barrier;
-					barrier.Transition.StateBefore = it->second.GetSubresourceState(pending_barrier.Transition.Subresource);
-					resource_barriers.push_back(barrier);
-				}
+				// 直接使用初始化的D3D12_RESOURCE_STATE_COMMON前置状态
+				resource_barriers.push_back(pending_barrier);
 			}
 		}
 

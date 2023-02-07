@@ -391,8 +391,6 @@ namespace light::rhi
 	void D12CommandList::ExecuteCommandList()
 	{
 		queue_->ExecuteCommandList(this);
-
-		ThrowIfFailed(device_->GetNative()->GetDeviceRemovedReason());
 	}
 
 	bool D12CommandList::Close(CommandList* pending_command_list)

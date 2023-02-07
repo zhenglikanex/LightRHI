@@ -16,7 +16,6 @@ namespace light::rhi
 		, hwnd_(hwnd)
 	{
 		command_queue_ = device_->GetCommandQueue(CommandListType::kDirect);
-		command_list_ = device_->GetCommandList(CommandListType::kDirect);
 
 		auto d12_queue = CheckedCast<D12CommandQueue*>(command_queue_);
 
@@ -68,7 +67,10 @@ namespace light::rhi
 
 	UINT D12SwapChain::Present()
 	{
-		//command_list_->ExecuteCommandList();
+		auto command_list = command_queue_->GetCommandList();
+		command_list->TransitionBarrier(back_buffer_textures_[current_back_buffer_index_], ResourceStates::kPresent);
+		command_list->ExecuteCommandList();
+
 		ThrowIfFailed(device_->GetNative()->GetDeviceRemovedReason());
 		ThrowIfFailed(dxgi_swap_chain_->Present(0, 0));
 
@@ -90,6 +92,8 @@ namespace light::rhi
 			width_ = std::max(1u, width);
 			height_ = std::max(1u, height);
 
+			device_->Flush();
+
 			for (uint32_t i = 0; i < kBufferCount; ++i)
 			{
 				back_buffer_textures_[i].Reset();
@@ -100,6 +104,8 @@ namespace light::rhi
 			ThrowIfFailed(dxgi_swap_chain_->ResizeBuffers(kBufferCount, width_, height_, desc.BufferDesc.Format, desc.Flags));
 
 			current_back_buffer_index_ = dxgi_swap_chain_->GetCurrentBackBufferIndex();
+
+			UpdateRenderTargetViews();
 		}
 	}
 
@@ -126,8 +132,7 @@ namespace light::rhi
 			//desc.debug_name = L"BackBuffer[" + std::to_wstring(i) + L"]";
 #endif
 
-			TextureHandle texture = device_->CreateTextureForNative(desc, back_buffer.Get());
-			back_buffer_textures_[i].Attach(CheckedCast<D12Texture*>(texture.Detach()));
+			back_buffer_textures_[i]  = device_->CreateTextureForNative(desc, back_buffer.Get());
 		}
 	}
 }

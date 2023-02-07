@@ -55,13 +55,14 @@ namespace light::rhi
 
 		CommandList* GetCommandList(CommandListType type) override;
 
+		void Flush() override;
+
 		IDXGIFactory5* GetDxgiFactory() { return dxgi_factory_.Get(); }
 
 		RootSignatureHandle GetRootSignature(BindingLayout* binding_layout, bool allow_input_layout);
 
 		DescriptorAllocation AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t num_descriptors);
 
-		void Flush();
 
 		void ReleaseRootSignature(const RootSignature* root_signature);
 

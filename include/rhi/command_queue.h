@@ -27,6 +27,8 @@ namespace light::rhi
 
 		// 等待当前所有的FightCommandList结束
 		virtual void Flush() = 0;
+
+		virtual void ProcessCommandLists() = 0;
 	protected:
 		CommandListType command_list_type_;
 	};

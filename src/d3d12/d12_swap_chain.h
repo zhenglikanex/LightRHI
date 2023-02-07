@@ -34,12 +34,11 @@ namespace light::rhi
 
 		D12Device* device_;
 		CommandQueue* command_queue_;
-		CommandList* command_list_;
 		HWND hwnd_;
 		uint32_t width_;
 		uint32_t height_;
 		Handle<IDXGISwapChain4> dxgi_swap_chain_;
-		Handle<D12Texture> back_buffer_textures_[kBufferCount];
+		TextureHandle back_buffer_textures_[kBufferCount];
 		uint32_t current_back_buffer_index_;
 		uint64_t fence_values_[kBufferCount];
 	};

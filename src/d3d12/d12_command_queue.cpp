@@ -7,6 +7,7 @@ namespace light::rhi
 		: CommandQueue(type)
 		, device_(device)
 		, fence_value_(0)
+		, run_(true)
 	{
 		D3D12_COMMAND_QUEUE_DESC desc{};
 		desc.Type = ConvertCommandListType(type);
@@ -28,15 +29,17 @@ namespace light::rhi
 			queue_->SetName(L"Copy Command Queue");
 			break;
 		}
+
+		command_thread_ = std::thread(&D12CommandQueue::ProcessCommandLists, this);
 	}
 
 	CommandList* D12CommandQueue::GetCommandList()
 	{
-		Handle<D12CommandList> command_list = nullptr;
+		Handle<CommandList> command_list = nullptr;
 		if(!available_command_lists_.TryPop(command_list))
 		{
 			command_list = MakeHandle<D12CommandList>(device_, command_list_type_,this);
-		} 
+		}
 
 		return command_list;
 	}
@@ -123,5 +126,31 @@ namespace light::rhi
 		}
 
 		return fence_value;
+	}
+
+	void D12CommandQueue::ProcessCommandLists()
+	{
+		std::unique_lock<std::mutex> lock(mutex_, std::defer_lock);
+
+		while(run_)
+		{
+			CommandListEntry entry;
+			lock.lock();
+
+			while(flight_command_lists_.TryPop(entry))
+			{
+				WaitForFenceValue(entry.fence_value);
+
+				entry.command_list->Reset();
+
+				available_command_lists_.Push(entry.command_list);
+			}
+
+			lock.unlock();
+
+			condition_.notify_one();
+
+			std::this_thread::yield();
+		}
 	}
 }

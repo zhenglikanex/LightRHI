@@ -25,6 +25,8 @@ namespace light::rhi
 
 		virtual CommandQueue* GetCommandQueue(CommandListType type) = 0;
 		virtual CommandList* GetCommandList(CommandListType type) = 0;
+
+		virtual void Flush() = 0;
 	};
 
 	using DeviceHandle = Handle<Device>;

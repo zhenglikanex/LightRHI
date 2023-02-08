@@ -14,6 +14,7 @@ namespace light::rhi
 	D12SwapChain::D12SwapChain(D12Device* device, HWND hwnd)
 		: device_(device)
 		, hwnd_(hwnd)
+		, fence_values_{0}
 	{
 		command_queue_ = device_->GetCommandQueue(CommandListType::kDirect);
 
@@ -132,7 +133,7 @@ namespace light::rhi
 			//desc.debug_name = L"BackBuffer[" + std::to_wstring(i) + L"]";
 #endif
 
-			back_buffer_textures_[i]  = device_->CreateTextureForNative(desc, back_buffer.Get());
+			back_buffer_textures_[i] = device_->CreateTextureForNative(desc, back_buffer.Get());
 		}
 	}
 }

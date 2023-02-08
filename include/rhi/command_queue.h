@@ -14,7 +14,7 @@ namespace light::rhi
 		{
 		}
 
-		virtual CommandList* GetCommandList() = 0;
+		virtual CommandListHandle GetCommandList() = 0;
 
 		virtual uint64_t ExecuteCommandList(CommandList* command_list) = 0;
 		virtual uint64_t ExecuteCommandLists(uint64_t num, CommandList* command_lists) = 0;

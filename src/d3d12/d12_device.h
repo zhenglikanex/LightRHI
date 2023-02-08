@@ -33,7 +33,7 @@ namespace light::rhi
 	public:
 		D12Device();
 
-		~D12Device() override = default;
+		~D12Device() override;
 
 		GraphicsApi GetGraphicsApi() const override { return GraphicsApi::kD3D12; }
 
@@ -53,7 +53,7 @@ namespace light::rhi
 
 		CommandQueue* GetCommandQueue(CommandListType type) override;
 
-		CommandList* GetCommandList(CommandListType type) override;
+		CommandListHandle GetCommandList(CommandListType type) override;
 
 		void Flush() override;
 

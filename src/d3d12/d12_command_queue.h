@@ -21,7 +21,9 @@ namespace light::rhi
 	public:
 		D12CommandQueue(D12Device* device, CommandListType type);
 
-		CommandList* GetCommandList() override;
+		~D12CommandQueue() override;
+
+		CommandListHandle GetCommandList() override;
 
 		uint64_t Signal() override;
 

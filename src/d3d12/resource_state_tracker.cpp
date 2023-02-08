@@ -106,15 +106,23 @@ namespace light::rhi
 				}
 				else
 				{
-					D3D12_RESOURCE_BARRIER barrier = pending_barrier;
-					barrier.Transition.StateBefore = it->second.GetSubresourceState(pending_barrier.Transition.Subresource);
-					resource_barriers.push_back(barrier);
+					auto final_state = it->second.GetSubresourceState(pending_barrier.Transition.Subresource);
+					if(final_state != pending_barrier.Transition.StateAfter)
+					{
+						D3D12_RESOURCE_BARRIER barrier = pending_barrier;
+						barrier.Transition.StateBefore = final_state;
+						resource_barriers.push_back(barrier);
+					}
 				}
 			}
 			else
 			{
+
 				// 直接使用初始化的D3D12_RESOURCE_STATE_COMMON前置状态
-				resource_barriers.push_back(pending_barrier);
+				if(pending_barrier.Transition.StateBefore != D3D12_RESOURCE_STATE_COMMON)
+				{
+					resource_barriers.push_back(pending_barrier);
+				}
 			}
 		}
 

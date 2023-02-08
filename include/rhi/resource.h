@@ -274,6 +274,7 @@ namespace light::rhi
     template<class T,class ... Args>
     Handle<T> MakeHandle(Args&& ... args)
     {
-        return Handle<T>(new T(std::forward<Args>(args)...));
+        auto ptr = new T(std::forward<Args>(args)...);
+        return Handle<T>::Create(ptr);
     }
 }

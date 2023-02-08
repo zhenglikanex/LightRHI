@@ -82,6 +82,7 @@ namespace light
 			OnUpdate(dt);
 			OnRender(dt);
 		}
+
 	}
 
 	void Game::OnResize(uint32_t width, uint32_t height)

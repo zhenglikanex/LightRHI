@@ -33,7 +33,9 @@ namespace light::rhi
 		, descriptor_size_(allocation.descriptor_size_)
 		, page_(std::move(allocation.page_))
 	{
-
+		allocation.descriptor_.ptr = 0;
+		allocation.num_handles_ = 0;
+		allocation.descriptor_size_ = 0;
 	}
 
 	DescriptorAllocation& DescriptorAllocation::operator=(DescriptorAllocation&& other) noexcept
@@ -300,7 +302,7 @@ namespace light::rhi
 			allocation = page->Allocate(num_descriptors);
 		}
 
-		return std::move(allocation);
+		return allocation;
 	}
 
 	void DescriptorAllocator::ReleaseStaleDescriptors()

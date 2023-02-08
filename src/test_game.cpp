@@ -48,19 +48,19 @@ public:
 
 	void OnUpdate(double dt) override
 	{
-		auto command_list = device_->GetCommandList(CommandListType::kDirect);
+		//auto command_list = device_->GetCommandList(CommandListType::kDirect);
 
-		RenderTarget rt = swap_chain_->GetRenderTarget();
+		//RenderTarget rt = swap_chain_->GetRenderTarget();
 
-		command_list->SetRenderTarget(rt);
-		command_list->SetViewport(rt.GetViewport());
-		command_list->SetScissorRect({ 0,0,std::numeric_limits<uint32_t>::max(),std::numeric_limits<uint32_t>::max() });
+		//command_list->SetRenderTarget(rt);
+		//command_list->SetViewport(rt.GetViewport());
+		//command_list->SetScissorRect({ 0,0,std::numeric_limits<uint32_t>::max(),std::numeric_limits<uint32_t>::max() });
 
-		float clear_color[] = { 1.0, 0.0, 0.0, 1.0 };
-		command_list->ClearTexture(rt.GetAttachment(AttachmentPoint::kColor0).texture,clear_color);
+		//float clear_color[] = { 1.0, 0.0, 0.0, 1.0 };
+		//command_list->ClearTexture(rt.GetAttachment(AttachmentPoint::kColor0).texture,clear_color);
 
-		//command_list->SetGraphicsPipeline(pso_);
-		command_list->ExecuteCommandList();
+		////command_list->SetGraphicsPipeline(pso_);
+		//command_list->ExecuteCommandList();
 
 		swap_chain_->Present();
 	}

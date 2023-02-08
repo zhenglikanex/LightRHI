@@ -56,8 +56,8 @@ namespace light::rhi
 		}
 
 		queues_[static_cast<size_t>(CommandListType::kDirect)] = MakeHandle<D12CommandQueue>(this, CommandListType::kDirect);
-		queues_[static_cast<size_t>(CommandListType::kCompute)] = MakeHandle<D12CommandQueue>(this, CommandListType::kCompute);
-		queues_[static_cast<size_t>(CommandListType::kCopy)] = MakeHandle<D12CommandQueue>(this, CommandListType::kCopy);
+		/*queues_[static_cast<size_t>(CommandListType::kCompute)] = MakeHandle<D12CommandQueue>(this, CommandListType::kCompute);
+		queues_[static_cast<size_t>(CommandListType::kCopy)] = MakeHandle<D12CommandQueue>(this, CommandListType::kCopy);*/
 
 		ThrowIfFailed(device_->GetDeviceRemovedReason());
 
@@ -66,6 +66,11 @@ namespace light::rhi
 			descriptor_allocators_[i] = 
 				std::make_unique<DescriptorAllocator>(this, static_cast<D3D12_DESCRIPTOR_HEAP_TYPE>(i));
 		}
+	}
+
+	D12Device::~D12Device()
+	{
+		Flush();
 	}
 
 	SwapChainHandle D12Device::CreateSwapChian(HWND hwnd)
@@ -90,7 +95,8 @@ namespace light::rhi
 
 	TextureHandle D12Device::CreateTextureForNative(const TextureDesc& desc, void* resource)
 	{
-		return MakeHandle<D12Texture>(this, desc, static_cast<ID3D12Resource*>(resource));
+		auto tex = MakeHandle<D12Texture>(this, desc, static_cast<ID3D12Resource*>(resource));
+		return tex;
 	}
 
 	InputLayoutHandle D12Device::CreateInputLayout(std::vector<VertexAttributeDesc> attributes)
@@ -108,7 +114,7 @@ namespace light::rhi
 		return queues_[static_cast<uint32_t>(type)];
 	}
 
-	CommandList* D12Device::GetCommandList(CommandListType type)
+	CommandListHandle D12Device::GetCommandList(CommandListType type)
 	{
 	 	return  queues_[static_cast<size_t>(type)]->GetCommandList();
 	}
@@ -137,7 +143,10 @@ namespace light::rhi
 	{
 		for(auto queue : queues_)
 		{
-			queue->Flush();
+			if(queue)
+			{
+				queue->Flush();
+			}
 		}
 	}
 

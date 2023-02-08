@@ -1,8 +1,47 @@
 #include "d12_command_queue.h"
 #include "d12_device.h"
+#include <chrono>
+#include <iostream>
+#include "d3dcommon.h"
+
+#if !defined(NO_D3D11_DEBUG_NAME) && ( defined(_DEBUG) || defined(PROFILE) )
+#pragma comment(lib,"dxguid.lib")
+#endif
 
 namespace light::rhi
 {
+	// Set the name of a running thread (for debugging)
+#pragma pack( push, 8 )
+	typedef struct tagTHREADNAME_INFO
+	{
+		DWORD  dwType;      // Must be 0x1000.
+		LPCSTR szName;      // Pointer to name (in user addr space).
+		DWORD  dwThreadID;  // Thread ID (-1=caller thread).
+		DWORD  dwFlags;     // Reserved for future use, must be zero.
+	} THREADNAME_INFO;
+#pragma pack( pop )
+
+	// Set the name of an std::thread.
+// Useful for debugging.
+	const DWORD MS_VC_EXCEPTION = 0x406D1388;
+
+	inline void SetThreadName(std::thread& thread, const char* threadName)
+	{
+		THREADNAME_INFO info;
+		info.dwType = 0x1000;
+		info.szName = threadName;
+		info.dwThreadID = ::GetThreadId(reinterpret_cast<HANDLE>(thread.native_handle()));
+		info.dwFlags = 0;
+
+		__try
+		{
+			::RaiseException(MS_VC_EXCEPTION, 0, sizeof(info) / sizeof(ULONG_PTR), (ULONG_PTR*)&info);
+		}
+		__except (EXCEPTION_EXECUTE_HANDLER)
+		{
+		}
+	}
+
 	D12CommandQueue::D12CommandQueue(D12Device* device, CommandListType type)
 		: CommandQueue(type)
 		, device_(device)
@@ -18,24 +57,36 @@ namespace light::rhi
 		ThrowIfFailed(device_->GetNative()->CreateCommandQueue(&desc, IID_PPV_ARGS(&queue_)));
 		ThrowIfFailed(device_->GetNative()->CreateFence(fence_value_, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence_)));
 
+		const char* thread_name = nullptr;
 		switch (type) {
 		case CommandListType::kDirect:
 			queue_->SetName(L"Direct Command Queue");
+			thread_name = "Direct Command Queue";
 			break;
 		case CommandListType::kCompute:
 			queue_->SetName(L"Compute Command Queue");
+			thread_name = "Compute Command Queue";
 			break;
 		case CommandListType::kCopy:
 			queue_->SetName(L"Copy Command Queue");
+			thread_name = "Copy Command Queue";
 			break;
 		}
 
 		command_thread_ = std::thread(&D12CommandQueue::ProcessCommandLists, this);
+		SetThreadName(command_thread_, thread_name);
 	}
 
-	CommandList* D12CommandQueue::GetCommandList()
+	D12CommandQueue::~D12CommandQueue()
+	{
+		run_ = false;
+		command_thread_.join();
+	}
+
+	CommandListHandle D12CommandQueue::GetCommandList()
 	{
 		Handle<CommandList> command_list = nullptr;
+		//std::cout << available_command_lists_.Size() << std::endl;
 		if(!available_command_lists_.TryPop(command_list))
 		{
 			command_list = MakeHandle<D12CommandList>(device_, command_list_type_,this);
@@ -73,9 +124,13 @@ namespace light::rhi
 
 	void D12CommandQueue::Flush()
 	{
-		std::unique_lock<std::mutex> lock;
+		std::unique_lock lock(mutex_);
+
 		// 等待提交线程
-		condition_.wait(lock, [this] {return flight_command_lists_.Empty(); });
+		condition_.wait(lock, [this]
+			{
+				return flight_command_lists_.Empty();
+			});
 
 		WaitForFenceValue(fence_value_);
 	}
@@ -87,10 +142,11 @@ namespace light::rhi
 
 	uint64_t D12CommandQueue::ExecuteCommandLists(uint64_t num, CommandList* command_lists)
 	{
+		std::cout << "11111" << std::endl;
 		std::unique_lock<std::mutex> lock(ResourceStateTracker::s_global_mutex);
 
 		// 等待上传到fight_command_lists列表
-		std::vector<CommandList*> flight_command_lists;
+		std::vector<CommandListHandle> flight_command_lists;
 		flight_command_lists.reserve(num * 2);
 
 		std::vector<ID3D12CommandList*> d3d12_command_lists;
@@ -101,7 +157,7 @@ namespace light::rhi
 			auto pending_command_list = GetCommandList();
 			if (command_lists->Close(pending_command_list))
 			{
-				auto d12_pending_command_list = CheckedCast<D12CommandList*>(pending_command_list);
+				auto d12_pending_command_list = CheckedCast<D12CommandList*>(pending_command_list.Get());
 				d12_pending_command_list->Close();
 
 				d3d12_command_lists.push_back(d12_pending_command_list->GetD3D12GraphicsCommandList());
@@ -111,6 +167,7 @@ namespace light::rhi
 			d3d12_command_lists.push_back(d12_command_list->GetD3D12GraphicsCommandList());
 
 			flight_command_lists.push_back(&command_lists[i]);
+			flight_command_lists.push_back(pending_command_list);
 		}
 
 		queue_->ExecuteCommandLists(static_cast<UINT>(d3d12_command_lists.size()), d3d12_command_lists.data());
@@ -130,23 +187,24 @@ namespace light::rhi
 
 	void D12CommandQueue::ProcessCommandLists()
 	{
-		std::unique_lock<std::mutex> lock(mutex_, std::defer_lock);
+		//std::unique_lock<std::mutex> lock(mutex_, std::defer_lock);
 
 		while(run_)
 		{
 			CommandListEntry entry;
-			lock.lock();
+			//lock.lock();
 
 			while(flight_command_lists_.TryPop(entry))
 			{
+				std::cout << "wait" << std::endl;
 				WaitForFenceValue(entry.fence_value);
-
+				std::cout << "stop" << std::endl;
 				entry.command_list->Reset();
 
 				available_command_lists_.Push(entry.command_list);
 			}
 
-			lock.unlock();
+			//lock.unlock();
 
 			condition_.notify_one();
 

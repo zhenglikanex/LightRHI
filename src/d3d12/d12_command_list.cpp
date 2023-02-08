@@ -20,6 +20,12 @@ namespace light::rhi
 			d3d12_command_allocator_.Get(), 
 			nullptr, 
 			IID_PPV_ARGS(&d3d12_command_list_)));
+		
+		static int id = 0;
+
+		std::wstring name = L"D12CommandList" + std::to_wstring(id++);
+
+		d3d12_command_list_->SetName(name.c_str());
 
 		for (size_t i = 0; i < D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES; ++i)
 		{

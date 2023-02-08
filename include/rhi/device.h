@@ -24,7 +24,7 @@ namespace light::rhi
 		virtual GraphicsPipelineHandle CreateGraphicsPipeline(GraphicsPipelineDesc desc, const RenderTarget& render_target) = 0;
 
 		virtual CommandQueue* GetCommandQueue(CommandListType type) = 0;
-		virtual CommandList* GetCommandList(CommandListType type) = 0;
+		virtual CommandListHandle GetCommandList(CommandListType type) = 0;
 
 		virtual void Flush() = 0;
 	};

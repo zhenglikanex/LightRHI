@@ -1,5 +1,8 @@
 #include "game.h"
 
+#include <thread>
+#include <chrono>
+
 using namespace light;
 using namespace light::rhi;
 
@@ -61,8 +64,10 @@ public:
 
 		////command_list->SetGraphicsPipeline(pso_);
 		//command_list->ExecuteCommandList();
-
+		
 		swap_chain_->Present();
+
+		//std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
 
 	void OnRender(double dt) override

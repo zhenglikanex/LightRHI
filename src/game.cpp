@@ -7,6 +7,8 @@
 #include <GLFW/glfw3native.h>
 #endif
 
+#include <auto_timer.h>
+
 
 namespace light
 {
@@ -79,6 +81,7 @@ namespace light
 			double cur_time = glfwGetTime();
 			double dt = cur_time - last_frame_time_;
 
+			//AutoTimer update("Update");
 			OnUpdate(dt);
 			OnRender(dt);
 		}

@@ -101,11 +101,8 @@ namespace light::rhi
 		void TrackResource(Resource* resource) override;
 
 		void FlushResourceBarriers() override;
-	public:
-		
-
-
 	private:
+		uint32_t id_ = 0;
 		D12Device* device_;
 		Handle<ID3D12CommandAllocator> d3d12_command_allocator_;
 		Handle<ID3D12GraphicsCommandList> d3d12_command_list_;

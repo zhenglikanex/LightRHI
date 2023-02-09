@@ -3,6 +3,8 @@
 #include <queue>
 #include <mutex>
 
+#include "spin.hpp"
+
 namespace light::rhi
 {
 	template<class T>
@@ -15,19 +17,19 @@ namespace light::rhi
 		}
 		ThreadSafeQueue(const ThreadSafeQueue& rhs)
 		{
-			std::unique_lock<std::mutex> lock(rhs.mutex_);
+			std::unique_lock<Spin> lock(rhs.mutex_);
 			queue_ = rhs.queue_;
 		}
 
 		void Push(T value)
 		{
-			std::unique_lock<std::mutex> lock(mutex_);
+			std::unique_lock<Spin> lock(mutex_);
 			queue_.push(std::move(value));
 		}
 
 		bool TryPop(T& value)
 		{
-			std::unique_lock<std::mutex> lock(mutex_);
+			std::unique_lock<Spin> lock(mutex_);
 			if(queue_.empty())
 			{
 				return false;
@@ -41,17 +43,17 @@ namespace light::rhi
 
 		bool Empty() const
 		{
-			std::unique_lock<std::mutex> lock(mutex_);
+			std::unique_lock<Spin> lock(mutex_);
 			return queue_.empty();
 		}
 
 		size_t Size() const
 		{
-			std::unique_lock<std::mutex> lock(mutex_);
+			std::unique_lock<Spin> lock(mutex_);
 			return queue_.size();
 		}
 	private:
-		mutable std::mutex mutex_;
+		mutable Spin mutex_;
 		std::queue<T> queue_;
 	};
 }

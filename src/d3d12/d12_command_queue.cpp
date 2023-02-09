@@ -1,9 +1,10 @@
 #include "d12_command_queue.h"
 #include "d12_device.h"
+
 #include <chrono>
 #include <iostream>
 #include "d3dcommon.h"
-
+#include "auto_timer.h"
 #if !defined(NO_D3D11_DEBUG_NAME) && ( defined(_DEBUG) || defined(PROFILE) )
 #pragma comment(lib,"dxguid.lib")
 #endif
@@ -74,6 +75,8 @@ namespace light::rhi
 		}
 
 		command_thread_ = std::thread(&D12CommandQueue::ProcessCommandLists, this);
+
+		SetThreadPriority(command_thread_.native_handle(), THREAD_PRIORITY_TIME_CRITICAL);
 		SetThreadName(command_thread_, thread_name);
 	}
 
@@ -89,8 +92,14 @@ namespace light::rhi
 		//std::cout << available_command_lists_.Size() << std::endl;
 		if(!available_command_lists_.TryPop(command_list))
 		{
+			//std::cout << "new commandlist\n";
+
+			auto str ="new commandlist" + std::to_string(available_command_lists_.Size()) + "  +  " + std::to_string(flight_command_lists_.Size());
+			AutoTimer timer(str);
 			command_list = MakeHandle<D12CommandList>(device_, command_list_type_,this);
 		}
+
+		//std::cout << std::ios::hex << command_list.Get() << std::endl;
 
 		return command_list;
 	}
@@ -142,7 +151,6 @@ namespace light::rhi
 
 	uint64_t D12CommandQueue::ExecuteCommandLists(uint64_t num, CommandList* command_lists)
 	{
-		std::cout << "11111" << std::endl;
 		std::unique_lock<std::mutex> lock(ResourceStateTracker::s_global_mutex);
 
 		// 等待上传到fight_command_lists列表
@@ -158,10 +166,11 @@ namespace light::rhi
 			if (command_lists->Close(pending_command_list))
 			{
 				auto d12_pending_command_list = CheckedCast<D12CommandList*>(pending_command_list.Get());
-				d12_pending_command_list->Close();
 
 				d3d12_command_lists.push_back(d12_pending_command_list->GetD3D12GraphicsCommandList());
 			}
+
+			pending_command_list->Close();
 
 			auto d12_command_list = CheckedCast<D12CommandList*>(&command_lists[i]);
 			d3d12_command_lists.push_back(d12_command_list->GetD3D12GraphicsCommandList());
@@ -188,27 +197,39 @@ namespace light::rhi
 	void D12CommandQueue::ProcessCommandLists()
 	{
 		//std::unique_lock<std::mutex> lock(mutex_, std::defer_lock);
-
 		while(run_)
 		{
 			CommandListEntry entry;
 			//lock.lock();
 
+			//AutoTimer ProcessCommandLists("ProcessCommandLists" + std::to_string(flight_command_lists_.Size()));
+
 			while(flight_command_lists_.TryPop(entry))
 			{
-				std::cout << "wait" << std::endl;
-				WaitForFenceValue(entry.fence_value);
-				std::cout << "stop" << std::endl;
+				
+				if (flight_command_lists_.Size() > 10)
+				{
+					int a = 10;
+
+				}
+				{
+					//AutoTimer wait_timer("Process WaitForFenceValue One");
+					WaitForFenceValue(entry.fence_value);
+				}
+
 				entry.command_list->Reset();
 
-				available_command_lists_.Push(entry.command_list);
+				{
+					//AutoTimer wait_timer("Push CommandList");
+					available_command_lists_.Push(entry.command_list);
+				}
 			}
 
 			//lock.unlock();
 
-			condition_.notify_one();
+			//condition_.notify_one();
 
-			std::this_thread::yield();
+			//std::this_thread::yield();
 		}
 	}
 }

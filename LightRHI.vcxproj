@@ -130,6 +130,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\auto_timer.h" />
     <ClInclude Include="include\rhi\base.h" />
     <ClInclude Include="include\rhi\buffer.h" />
     <ClInclude Include="include\rhi\command_list.h" />
@@ -141,6 +142,7 @@
     <ClInclude Include="include\rhi\render_target.h" />
     <ClInclude Include="include\rhi\resource.h" />
     <ClInclude Include="include\rhi\shader.h" />
+    <ClInclude Include="include\rhi\spin.hpp" />
     <ClInclude Include="include\rhi\swap_chain.h" />
     <ClInclude Include="include\rhi\texture.h" />
     <ClInclude Include="include\rhi\thread_safe_queue.hpp" />

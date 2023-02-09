@@ -114,6 +114,12 @@
     <ClInclude Include="src\d3d12\dynamic_descriptor_heap.h">
       <Filter>头文件\d3d12</Filter>
     </ClInclude>
+    <ClInclude Include="include\auto_timer.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\rhi\spin.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\d3d12\d12_device.cpp">

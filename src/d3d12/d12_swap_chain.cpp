@@ -70,39 +70,19 @@ namespace light::rhi
 
 	UINT D12SwapChain::Present()
 	{
-		{
-			//AutoTimer time1("time1");
-			auto command_list = command_queue_->GetCommandList();
-			//time1.Dump("GetCommandList ");
-			{
-				//AutoTimer time1("time12");
-				command_list->TransitionBarrier(back_buffer_textures_[current_back_buffer_index_], ResourceStates::kPresent);
-			}
+		auto command_list = command_queue_->GetCommandList();
+		command_list->TransitionBarrier(back_buffer_textures_[current_back_buffer_index_], ResourceStates::kPresent);
+		command_list->ExecuteCommandList();
 
-			{
-				//AutoTimer time2("timer13");
-				command_list->ExecuteCommandList();
-			}
-			
-		}
-		
+		ThrowIfFailed(dxgi_swap_chain_->Present(0, 0));
 
-		{
-			//AutoTimer timer("timer2");
-			ThrowIfFailed(dxgi_swap_chain_->Present(0, 0));
-		}
-		
-		{
+		// 记录当前的同步量
+		fence_values_[current_back_buffer_index_] = command_queue_->Signal();
 
-			//AutoTimer timer("timer3");
-			// 记录当前的同步量
-			fence_values_[current_back_buffer_index_] = command_queue_->Signal();
+		current_back_buffer_index_ = dxgi_swap_chain_->GetCurrentBackBufferIndex();
 
-			current_back_buffer_index_ = dxgi_swap_chain_->GetCurrentBackBufferIndex();
-
-			// 等待上一帧
-			command_queue_->WaitForFenceValue(fence_values_[current_back_buffer_index_]);
-		}
+		// 等待上一帧
+		command_queue_->WaitForFenceValue(fence_values_[current_back_buffer_index_]);
 
 		return current_back_buffer_index_;
 	}

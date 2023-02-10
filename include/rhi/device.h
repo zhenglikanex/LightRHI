@@ -2,6 +2,7 @@
 
 #include "base.h"
 #include "resource.h"
+#include "shader.h"
 #include "buffer.h"
 #include "texture.h"
 #include "graphics_pipeline.h"
@@ -16,6 +17,16 @@ namespace light::rhi
 	{
 	public:
 		virtual GraphicsApi GetGraphicsApi() const = 0;
+
+		virtual ShaderHandle CreateShader(ShaderType type, std::string_view file) = 0;
+
+		virtual ShaderHandle CreateShader(ShaderType type, std::vector<char> bytecode)
+		{
+			ShaderDesc desc;
+			desc.type = type;
+
+			return MakeHandle<Shader>(desc, std::move(bytecode));
+		}
 
 		virtual BufferHandle CreateBuffer(BufferDesc desc) = 0;
 		virtual TextureHandle CreateTexture(const TextureDesc& desc) = 0;

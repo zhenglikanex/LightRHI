@@ -51,6 +51,8 @@ namespace light
 
 	void Game::Shutdown()
 	{
+		device_->Flush();
+
 		if(swap_chain_)
 		{
 			swap_chain_.Reset();

@@ -38,9 +38,6 @@ public:
 
 		depth_stencil_texture_ = device_->CreateTexture(depth_tex_desc);
 
-		RenderTarget rt = swap_chain_->GetRenderTarget();
-		rt.AttacthAttachment(AttachmentPoint::kDepthStencil, depth_stencil_texture_);
-
 		GraphicsPipelineDesc pso_desc;
 		pso_desc.input_layout = device_->CreateInputLayout(std::move(vertex_attributes));
 
@@ -51,23 +48,24 @@ public:
 
 	void OnUpdate(double dt) override
 	{
-		//auto command_list = device_->GetCommandList(CommandListType::kDirect);
+		auto command_list = device_->GetCommandList(CommandListType::kDirect);
 
-		//RenderTarget rt = swap_chain_->GetRenderTarget();
+		RenderTarget rt = swap_chain_->GetRenderTarget();
+		rt.AttacthAttachment(AttachmentPoint::kDepthStencil, depth_stencil_texture_);
 
-		//command_list->SetRenderTarget(rt);
-		//command_list->SetViewport(rt.GetViewport());
-		//command_list->SetScissorRect({ 0,0,std::numeric_limits<uint32_t>::max(),std::numeric_limits<uint32_t>::max() });
+		command_list->SetRenderTarget(rt);
+		command_list->SetViewport(rt.GetViewport());
+		command_list->SetScissorRect({ 0,0,std::numeric_limits<uint32_t>::max(),std::numeric_limits<uint32_t>::max() });
 
-		//float clear_color[] = { 1.0, 0.0, 0.0, 1.0 };
-		//command_list->ClearTexture(rt.GetAttachment(AttachmentPoint::kColor0).texture,clear_color);
+		float clear_color[] = { 1.0, 0.0, 0.0, 1.0 };
+		command_list->ClearTexture(rt.GetAttachment(AttachmentPoint::kColor0).texture,clear_color);
 
-		////command_list->SetGraphicsPipeline(pso_);
-		//command_list->ExecuteCommandList();
+		//command_list->SetGraphicsPipeline(pso_);
+		command_list->ExecuteCommandList();
 		
 		swap_chain_->Present();
 
-		//std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 	}
 
 	void OnRender(double dt) override
@@ -77,6 +75,8 @@ public:
 private:
 	TextureHandle depth_stencil_texture_;
 	GraphicsPipelineHandle pso_;
+	Buffer vertex_buffer_;
+	Buffer index_buffer_;
 };
 
 int main()

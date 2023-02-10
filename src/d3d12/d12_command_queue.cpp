@@ -133,13 +133,10 @@ namespace light::rhi
 
 	void D12CommandQueue::Flush()
 	{
-		std::unique_lock lock(mutex_);
-
-		// 等待提交线程
-		condition_.wait(lock, [this]
-			{
-				return flight_command_lists_.Empty();
-			});
+		while(!flight_command_lists_.Empty())
+		{
+			
+		}
 
 		WaitForFenceValue(fence_value_);
 	}
@@ -196,40 +193,15 @@ namespace light::rhi
 
 	void D12CommandQueue::ProcessCommandLists()
 	{
-		//std::unique_lock<std::mutex> lock(mutex_, std::defer_lock);
 		while(run_)
 		{
 			CommandListEntry entry;
-			//lock.lock();
-
-			//AutoTimer ProcessCommandLists("ProcessCommandLists" + std::to_string(flight_command_lists_.Size()));
-
 			while(flight_command_lists_.TryPop(entry))
 			{
-				
-				if (flight_command_lists_.Size() > 10)
-				{
-					int a = 10;
-
-				}
-				{
-					//AutoTimer wait_timer("Process WaitForFenceValue One");
-					WaitForFenceValue(entry.fence_value);
-				}
-
+				WaitForFenceValue(entry.fence_value);
 				entry.command_list->Reset();
-
-				{
-					//AutoTimer wait_timer("Push CommandList");
-					available_command_lists_.Push(entry.command_list);
-				}
+				available_command_lists_.Push(entry.command_list);
 			}
-
-			//lock.unlock();
-
-			//condition_.notify_one();
-
-			//std::this_thread::yield();
 		}
 	}
 }

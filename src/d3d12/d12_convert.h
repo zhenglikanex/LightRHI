@@ -140,6 +140,7 @@ namespace light::rhi
 
 	inline D3D12_SHADER_VISIBILITY ConvertShaderVisibility(ShaderVisibility visibility)
 	{
+		
 		return static_cast<D3D12_SHADER_VISIBILITY>(visibility);
 	}
 

@@ -41,6 +41,8 @@ namespace light::rhi
 
 		SwapChainHandle CreateSwapChian(HWND hwnd);
 
+		ShaderHandle CreateShader(ShaderType type, std::string_view file) override;
+
 		BufferHandle CreateBuffer(BufferDesc desc) override;
 
 		TextureHandle CreateTexture(const TextureDesc& desc) override;

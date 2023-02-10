@@ -78,6 +78,10 @@ namespace light::rhi
 		return MakeHandle<D12SwapChain>(this, hwnd);
 	}
 
+	ShaderHandle D12Device::CreateShader(ShaderType type, std::string_view file)
+	{
+	}
+
 	BufferHandle D12Device::CreateBuffer(BufferDesc desc)
 	{
 		if(desc.type == BufferType::kConstant)

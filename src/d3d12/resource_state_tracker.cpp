@@ -117,9 +117,8 @@ namespace light::rhi
 			}
 			else
 			{
-
 				// 直接使用初始化的D3D12_RESOURCE_STATE_COMMON前置状态
-				if(pending_barrier.Transition.StateBefore != D3D12_RESOURCE_STATE_COMMON)
+				if(pending_barrier.Transition.StateAfter != D3D12_RESOURCE_STATE_COMMON)
 				{
 					resource_barriers.push_back(pending_barrier);
 				}

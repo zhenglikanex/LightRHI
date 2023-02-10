@@ -71,6 +71,17 @@ namespace light::rhi
 		kTexture3D
 	};
 
+	enum class ShaderType : uint8_t
+	{
+		kNone = 0,
+		kVertex = 1,
+		kHull = 2,
+		kDomain = 3,
+		kGeometry = 4,
+		kPixel = 5,
+		kAmplification = 6,
+		kMesh = 7
+	};
 
 	enum class CommandListType : uint8_t
 	{

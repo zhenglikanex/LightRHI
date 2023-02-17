@@ -18,8 +18,6 @@ namespace light::rhi
 	public:
 		virtual GraphicsApi GetGraphicsApi() const = 0;
 
-		virtual ShaderHandle CreateShader(ShaderType type, std::string_view file) = 0;
-
 		virtual ShaderHandle CreateShader(ShaderType type, std::vector<char> bytecode)
 		{
 			ShaderDesc desc;
@@ -28,6 +26,7 @@ namespace light::rhi
 			return MakeHandle<Shader>(desc, std::move(bytecode));
 		}
 
+		virtual ShaderHandle CreateShader(ShaderType type, const std::string& filename, const std::string& entrypoint, const std::string& target) = 0;
 		virtual BufferHandle CreateBuffer(BufferDesc desc) = 0;
 		virtual TextureHandle CreateTexture(const TextureDesc& desc) = 0;
 		virtual TextureHandle CreateTextureForNative(const TextureDesc& desc, void* resource) = 0;

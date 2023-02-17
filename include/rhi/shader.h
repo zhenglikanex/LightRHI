@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "resource.h"
+#include "types.h"
 
 namespace light::rhi
 {

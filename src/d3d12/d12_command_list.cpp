@@ -266,6 +266,11 @@ namespace light::rhi
 		}
 	}
 
+	void D12CommandList::SetPrimitiveTopology(PrimitiveTopology primitive_topology)
+	{
+		d3d12_command_list_->IASetPrimitiveTopology(ConvertPrimitiveTopology(primitive_topology));
+	}
+
 	void D12CommandList::SetVertexBuffer(uint32_t slot, Buffer* buffer)
 	{
 		const BufferDesc& desc = buffer->GetDesc();
@@ -273,6 +278,9 @@ namespace light::rhi
 		CHECK(desc.type == BufferType::kVertex, "buffer的Type不是VertexBuffer");
 
 		auto d12_buffer = CheckedCast<D12Buffer*>(buffer);
+
+		TrackResource(buffer);
+		TransitionBarrier(buffer, ResourceStates::kVertexAndConstantBuffer);
 
 		D3D12_VERTEX_BUFFER_VIEW view{};
 		view.BufferLocation = d12_buffer->GetNative()->GetGPUVirtualAddress();
@@ -289,6 +297,9 @@ namespace light::rhi
 		CHECK(desc.type == BufferType::kIndex,"buffer的Type不是IndexBuffer");
 
 		auto d12_buffer = CheckedCast<D12Buffer*>(buffer);
+
+		TrackResource(buffer);
+		TransitionBarrier(buffer, ResourceStates::kIndexBuffer);
 
 		D3D12_INDEX_BUFFER_VIEW view{};
 		view.BufferLocation = d12_buffer->GetNative()->GetGPUVirtualAddress();

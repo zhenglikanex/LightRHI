@@ -9,9 +9,9 @@ namespace light::rhi
 	{
 		(void*)device;
 
-		input_elements_.reserve(attributes.size());
+		input_elements_.reserve(attributes_.size());
 
-		for(auto& attribute : attributes)
+		for(auto& attribute : attributes_)
 		{
 			D3D12_INPUT_ELEMENT_DESC input_element {};
 			input_element.SemanticName = attribute.semantic_name.c_str();

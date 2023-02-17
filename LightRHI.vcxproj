@@ -131,6 +131,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\auto_timer.h" />
+    <ClInclude Include="include\framegraph\framegraph.h" />
+    <ClInclude Include="include\framegraph\framegraph_pass.h" />
+    <ClInclude Include="include\framegraph\framegraph_resource.h" />
+    <ClInclude Include="include\framegraph\graph_node.h" />
+    <ClInclude Include="include\framegraph\pass_node.h" />
+    <ClInclude Include="include\framegraph\resource_node.h" />
     <ClInclude Include="include\rhi\base.h" />
     <ClInclude Include="include\rhi\buffer.h" />
     <ClInclude Include="include\rhi\command_list.h" />
@@ -162,9 +168,15 @@
     <ClInclude Include="src\d3d12\resource_state_tracker.h" />
     <ClInclude Include="src\d3d12\root_signature.h" />
     <ClInclude Include="src\d3d12\upload_buffer.h" />
+    <ClInclude Include="src\framegraph\pass_node.h" />
     <ClInclude Include="src\game.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="include\framegraph\framegraph.cpp" />
+    <ClCompile Include="include\framegraph\framegraph_resource.cpp" />
+    <ClCompile Include="include\framegraph\graph_node.cpp" />
+    <ClCompile Include="include\framegraph\pass_node.cpp" />
+    <ClCompile Include="include\framegraph\resource_node.cpp" />
     <ClCompile Include="src\d3d12\command_queue.cpp" />
     <ClCompile Include="src\d3d12\d12_buffer.cpp" />
     <ClCompile Include="src\d3d12\d12_command_list.cpp" />

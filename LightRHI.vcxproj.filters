@@ -19,6 +19,12 @@
     <Filter Include="头文件\d3d12">
       <UniqueIdentifier>{9aad0f09-acfb-4718-b3cc-ce017ce9dac0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="rhi">
+      <UniqueIdentifier>{7dddb6e6-c1a0-40c6-8430-40146068f3fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="framegraph">
+      <UniqueIdentifier>{217f4d81-069f-428a-8cdc-ce8636e0e6cd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\rhi\base.h">
@@ -120,6 +126,27 @@
     <ClInclude Include="include\rhi\spin.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="src\framegraph\pass_node.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\framegraph\framegraph_pass.h">
+      <Filter>framegraph</Filter>
+    </ClInclude>
+    <ClInclude Include="include\framegraph\graph_node.h">
+      <Filter>framegraph</Filter>
+    </ClInclude>
+    <ClInclude Include="include\framegraph\pass_node.h">
+      <Filter>framegraph</Filter>
+    </ClInclude>
+    <ClInclude Include="include\framegraph\framegraph.h">
+      <Filter>framegraph</Filter>
+    </ClInclude>
+    <ClInclude Include="include\framegraph\framegraph_resource.h">
+      <Filter>framegraph</Filter>
+    </ClInclude>
+    <ClInclude Include="include\framegraph\resource_node.h">
+      <Filter>framegraph</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\d3d12\d12_device.cpp">
@@ -181,6 +208,21 @@
     </ClCompile>
     <ClCompile Include="src\d3d12\dynamic_descriptor_heap.cpp">
       <Filter>源文件\d3d12</Filter>
+    </ClCompile>
+    <ClCompile Include="include\framegraph\framegraph_resource.cpp">
+      <Filter>framegraph</Filter>
+    </ClCompile>
+    <ClCompile Include="include\framegraph\graph_node.cpp">
+      <Filter>framegraph</Filter>
+    </ClCompile>
+    <ClCompile Include="include\framegraph\pass_node.cpp">
+      <Filter>framegraph</Filter>
+    </ClCompile>
+    <ClCompile Include="include\framegraph\resource_node.cpp">
+      <Filter>framegraph</Filter>
+    </ClCompile>
+    <ClCompile Include="include\framegraph\framegraph.cpp">
+      <Filter>framegraph</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

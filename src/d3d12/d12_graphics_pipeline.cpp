@@ -49,7 +49,23 @@ namespace light::rhi
 			pso_desc.GS = { bytecode.data(),bytecode.size() };
 		}
 
-		pso_desc.PrimitiveTopologyType = ConvertPrimitiveTopology(desc.primitive_type);
+		switch (desc.primitive_type)
+		{
+		case PrimitiveTopology::kPointList:
+			pso_desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
+			break;
+		case PrimitiveTopology::kLineList:
+			pso_desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+			break;
+		case PrimitiveTopology::kTriangleList:
+		case PrimitiveTopology::kTriangleStrip:
+			pso_desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+			break;
+		case PrimitiveTopology::kPatchList:
+			pso_desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_PATCH;
+			break;
+		}
+
 		pso_desc.RasterizerState = ConvertRasterizeDesc(desc.rasterizer_state);
 		pso_desc.BlendState = ConvertBlendDesc(desc.blend_state);
 		pso_desc.DepthStencilState = ConvertDepthStencilDesc(desc.depth_stencil_state);

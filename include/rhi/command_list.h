@@ -75,6 +75,8 @@ namespace light::rhi
 
 		virtual void SetGraphicsPipeline(GraphicsPipeline* pso) = 0;
 
+		virtual void SetPrimitiveTopology(PrimitiveTopology primitive_topology) = 0;
+
 		virtual void SetVertexBuffer(uint32_t slot, Buffer* buffer) = 0;
 
 		virtual void SetIndexBuffer(Buffer* buffer) = 0;

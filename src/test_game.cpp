@@ -6,6 +6,13 @@
 using namespace light;
 using namespace light::rhi;
 
+struct Vertex
+{
+	float x;
+	float y;
+	float z;
+};
+
 class TestGame final : public Game
 {
 public:
@@ -26,10 +33,42 @@ public:
 
 	bool OnInit() override
 	{
+		auto command_list = device_->GetCommandList(CommandListType::kDirect);
+
 		std::vector<VertexAttributeDesc> vertex_attributes =
 		{
 			{"POSITION",0,Format::RGB32_FLOAT,0,~0u,false}
 		};
+
+		std::vector<Vertex> vertexs
+		{
+			{ -1.0f, -1.0f, -1.0f },
+			{ -1.0f, +1.0f, -1.0f },
+			{ +1.0f, +1.0f, -1.0f },
+		};
+
+		std::vector<uint16_t> indices
+		{
+			0,1,2
+		};
+
+		BufferDesc vertex_desc;
+		vertex_desc.type = BufferType::kVertex;
+		vertex_desc.format = Format::RGB32_FLOAT;
+		vertex_desc.byte = sizeof(Vertex) * 3;
+		vertex_desc.stride = sizeof(Vertex);
+		vertex_buffer_ = device_->CreateBuffer(vertex_desc);
+		
+		command_list->WriteBuffer(vertex_buffer_, (uint8_t*)vertexs.data(), vertexs.size() * sizeof(Vertex));
+
+		BufferDesc index_desc;
+		index_desc.format = Format::R16_UINT;
+		index_desc.type = BufferType::kIndex;
+		index_desc.byte = sizeof(uint16_t) * 3;
+		index_desc.stride = sizeof(uint16_t);
+		index_buffer_ = device_->CreateBuffer(index_desc);
+
+		command_list->WriteBuffer(index_buffer_, (uint8_t*)indices.data(), indices.size() * sizeof(uint16_t));
 
 		TextureDesc depth_tex_desc;
 		depth_tex_desc.format = Format::D24S8;
@@ -40,8 +79,16 @@ public:
 
 		GraphicsPipelineDesc pso_desc;
 		pso_desc.input_layout = device_->CreateInputLayout(std::move(vertex_attributes));
+		pso_desc.vs = device_->CreateShader(ShaderType::kVertex, "shaders/color.hlsl", "VS", "vs_5_0");
+		pso_desc.ps = device_->CreateShader(ShaderType::kPixel, "shaders/color.hlsl", "PS", "ps_5_0");
+		pso_desc.primitive_type = PrimitiveTopology::kTriangleList;
 
-		//pso_ = device_->CreateGraphicsPipeline(pso_desc,rt);
+		RenderTarget rt = swap_chain_->GetRenderTarget();
+		rt.AttacthAttachment(AttachmentPoint::kDepthStencil, depth_stencil_texture_);
+
+		pso_ = device_->CreateGraphicsPipeline(pso_desc,rt);
+
+		command_list->ExecuteCommandList();
 
 		return true;
 	}
@@ -60,7 +107,14 @@ public:
 		float clear_color[] = { 1.0, 0.0, 0.0, 1.0 };
 		command_list->ClearTexture(rt.GetAttachment(AttachmentPoint::kColor0).texture,clear_color);
 
-		//command_list->SetGraphicsPipeline(pso_);
+		command_list->SetGraphicsPipeline(pso_);
+
+		command_list->SetPrimitiveTopology(PrimitiveTopology::kTriangleList);
+		command_list->SetVertexBuffer(0, vertex_buffer_);
+		command_list->SetIndexBuffer(index_buffer_);
+
+		command_list->DrawIndexed(3, 0, 0, 0, 0);
+
 		command_list->ExecuteCommandList();
 		
 		swap_chain_->Present();
@@ -75,8 +129,8 @@ public:
 private:
 	TextureHandle depth_stencil_texture_;
 	GraphicsPipelineHandle pso_;
-	Buffer vertex_buffer_;
-	Buffer index_buffer_;
+	BufferHandle vertex_buffer_;
+	BufferHandle index_buffer_;
 };
 
 int main()

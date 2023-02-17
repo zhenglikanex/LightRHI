@@ -7,6 +7,8 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h> // For HRESULT
 #include <comdef.h> // For _com_error class (used to decode HR result codes).
+#include "d3dx12.h"
+#include <D3Dcompiler.h>
 
 namespace light::rhi
 {
@@ -78,8 +80,30 @@ namespace light::rhi
 		return MakeHandle<D12SwapChain>(this, hwnd);
 	}
 
-	ShaderHandle D12Device::CreateShader(ShaderType type, std::string_view file)
+	ShaderHandle D12Device::CreateShader(ShaderType type, const std::string& filename, const std::string& entrypoint, const std::string& target)
 	{
+		UINT compile_flags = 0;
+#if defined(DEBUG) || defined(_DEBUG)  
+		compile_flags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#endif
+		std::wstring wfilename(filename.cbegin(), filename.cend());
+
+		HRESULT hr = S_OK;
+		Handle<ID3DBlob> byte_code = nullptr;
+		Handle<ID3DBlob> errors;
+		// todo:¼ÓÈëshader_macro
+		hr = D3DCompileFromFile(wfilename.c_str(),nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+			entrypoint.c_str(), target.c_str(), compile_flags, 0, &byte_code, &errors);
+
+		if (errors != nullptr)
+			OutputDebugStringA((char*)errors->GetBufferPointer());
+
+		ThrowIfFailed(hr);
+
+		std::vector<char> vbyte_code(byte_code->GetBufferSize());
+		memcpy(vbyte_code.data(), byte_code->GetBufferPointer(), vbyte_code.size());
+
+		return Device::CreateShader(type, std::move(vbyte_code));
 	}
 
 	BufferHandle D12Device::CreateBuffer(BufferDesc desc)

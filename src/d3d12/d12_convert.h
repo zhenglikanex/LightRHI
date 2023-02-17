@@ -50,23 +50,26 @@ namespace light::rhi
 		return d12_rect;
 	}
 
-	inline D3D12_PRIMITIVE_TOPOLOGY_TYPE ConvertPrimitiveTopology(PrimitiveTopology primitive)
+	inline D3D_PRIMITIVE_TOPOLOGY ConvertPrimitiveTopology(PrimitiveTopology primitive)
 	{
-		switch (primitive) {
-		case PrimitiveTopology::kPointList: 
-			return D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
-		case PrimitiveTopology::kLineList: 
-			return D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
-		case PrimitiveTopology::kTriangleList: 
-		case PrimitiveTopology::kTriangleStrip: 
-		case PrimitiveTopology::kTriangleFan: 
-		case PrimitiveTopology::kTriangleListWithAdjacency: 
-		case PrimitiveTopology::kTriangleStripWithAdjacency: 
-			return D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-		case PrimitiveTopology::kPatchList: 
-			return D3D12_PRIMITIVE_TOPOLOGY_TYPE_PATCH;
+		switch (primitive)
+		{
+		case PrimitiveTopology::kPointList:
+			return D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
+		case PrimitiveTopology::kLineList:
+			return D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
+		case PrimitiveTopology::kTriangleList:
+			return D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+		case PrimitiveTopology::kTriangleStrip:
+			return D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+		case PrimitiveTopology::kTriangleFan:
+			return D3D_PRIMITIVE_TOPOLOGY_UNDEFINED;
+		case PrimitiveTopology::kTriangleListWithAdjacency:
+			return D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ;
+		case PrimitiveTopology::kTriangleStripWithAdjacency:
+			return D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP_ADJ;
 		default:
-			return D3D12_PRIMITIVE_TOPOLOGY_TYPE_UNDEFINED;
+			return D3D_PRIMITIVE_TOPOLOGY_UNDEFINED;
 		}
 	}
 

@@ -124,15 +124,19 @@ namespace light
 	{
 #ifdef _WIN32
 
-		switch (params_.api) {
+		switch (params_.api) 
+		{
 		case rhi::GraphicsApi::kNone:
+			//device_ = nullptr;
 			break;
 		case rhi::GraphicsApi::kD3D12:
 			device_ = rhi::MakeHandle<rhi::D12Device>();
 			break;
 		case rhi::GraphicsApi::kVulkan:
+			//device_ = nullptr;
 			break;
 		default:;
+			//device_ = nullptr;
 		}
 #endif
 

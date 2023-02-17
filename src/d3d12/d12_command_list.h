@@ -67,6 +67,8 @@ namespace light::rhi
 
 		void SetGraphicsPipeline(GraphicsPipeline* pso) override;
 
+		void SetPrimitiveTopology(PrimitiveTopology primitive_topology) override;
+
 		void SetVertexBuffer(uint32_t slot, Buffer* buffer) override;
 
 		void SetIndexBuffer(Buffer* buffer) override;

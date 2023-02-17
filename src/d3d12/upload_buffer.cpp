@@ -49,7 +49,7 @@ namespace light::rhi
 
 	std::shared_ptr<UploadBuffer::Page> UploadBuffer::RequestPage()
 	{
-		if(available_pages_.empty())
+		if(!available_pages_.empty())
 		{
 			auto page = available_pages_.front();
 			available_pages_.pop_front();

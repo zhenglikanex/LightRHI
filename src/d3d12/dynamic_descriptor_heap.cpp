@@ -222,7 +222,7 @@ namespace light::rhi
 				current_gpu_descriptor_handle_);
 
 			// ÒÆ¶¯current handle
-			current_cpu_descriptor_handle_.Offset(num_src_descriptors,descriptor_handle_increment_size_);
+			current_cpu_descriptor_handle_.Offset(num_src_descriptors, descriptor_handle_increment_size_);
 			current_gpu_descriptor_handle_.Offset(num_src_descriptors, descriptor_handle_increment_size_);
 
 			num_free_handles_ -= num_src_descriptors;

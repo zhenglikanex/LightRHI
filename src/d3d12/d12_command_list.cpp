@@ -152,11 +152,10 @@ namespace light::rhi
 
 		auto d12_buffer = CheckedCast<D12Buffer*>(buffer);
 
-		UploadBuffer::Allocation allocation = upload_buffer_.Allocate(size, 1);
+ 		UploadBuffer::Allocation allocation = upload_buffer_.Allocate(size, 1);
 
 		memcpy(allocation.cpu, data, size);
 
-		//todo:
 		TransitionBarrier(buffer, ResourceStates::kCopyDest);
 
 		d3d12_command_list_->CopyBufferRegion(
@@ -280,7 +279,7 @@ namespace light::rhi
 		auto d12_buffer = CheckedCast<D12Buffer*>(buffer);
 
 		TrackResource(buffer);
-		TransitionBarrier(buffer, ResourceStates::kVertexAndConstantBuffer);
+		TransitionBarrier(buffer, ResourceStates::kGenericRead);
 
 		D3D12_VERTEX_BUFFER_VIEW view{};
 		view.BufferLocation = d12_buffer->GetNative()->GetGPUVirtualAddress();
@@ -299,7 +298,7 @@ namespace light::rhi
 		auto d12_buffer = CheckedCast<D12Buffer*>(buffer);
 
 		TrackResource(buffer);
-		TransitionBarrier(buffer, ResourceStates::kIndexBuffer);
+		TransitionBarrier(buffer, ResourceStates::kGenericRead);
 
 		D3D12_INDEX_BUFFER_VIEW view{};
 		view.BufferLocation = d12_buffer->GetNative()->GetGPUVirtualAddress();
@@ -438,6 +437,8 @@ namespace light::rhi
 		ThrowIfFailed(d3d12_command_list_->Reset(d3d12_command_allocator_.Get(),nullptr));
 
 		track_resources_.clear();
+
+		upload_buffer_.Rest();
 
 		current_pso_ = nullptr;
 	}

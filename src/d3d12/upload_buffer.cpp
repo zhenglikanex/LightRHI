@@ -20,7 +20,7 @@ namespace light::rhi
 			return AllocateLarge(bytes, alignment);
 		}
 
-		if(!current_page_ || current_page_->HasSpace(bytes,alignment))
+		if(!current_page_ || !current_page_->HasSpace(bytes,alignment))
 		{
 			current_page_ = RequestPage();
 		}
@@ -98,7 +98,6 @@ namespace light::rhi
 		, offset_(0)
 	{
 		CD3DX12_HEAP_PROPERTIES heap_properties(D3D12_HEAP_TYPE_UPLOAD);
-
 		CD3DX12_RESOURCE_DESC buffer_desc = CD3DX12_RESOURCE_DESC::Buffer(page_size);
 
 		device_->GetNative()->CreateCommittedResource(

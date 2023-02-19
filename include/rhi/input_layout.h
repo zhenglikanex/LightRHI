@@ -11,7 +11,7 @@ namespace light::rhi
 	struct VertexAttributeDesc
 	{
 		std::string semantic_name;
-		uint32_t sematic_index;
+		uint32_t semantic_index;
 		Format format;
 		uint32_t slot;
 		uint32_t offset;

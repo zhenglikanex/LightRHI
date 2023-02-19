@@ -15,7 +15,7 @@ namespace light::rhi
 		{
 			D3D12_INPUT_ELEMENT_DESC input_element {};
 			input_element.SemanticName = attribute.semantic_name.c_str();
-			input_element.SemanticIndex = attribute.sematic_index;
+			input_element.SemanticIndex = attribute.semantic_index;
 			input_element.Format = GetDxgiFormatMapping(attribute.format).srv_format;
 			input_element.AlignedByteOffset = attribute.offset;
 			input_element.InputSlot = attribute.slot;

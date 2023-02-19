@@ -22,9 +22,7 @@ public:
 	}
 
 	~TestGame() override
-	{
-		
-	}
+	= default;
 
 	void OnResize(uint32_t width, uint32_t height) override
 	{
@@ -33,18 +31,19 @@ public:
 
 	bool OnInit() override
 	{
-		auto command_list = device_->GetCommandList(CommandListType::kDirect);
+		auto command_queue = device_->GetCommandQueue(CommandListType::kDirect);
+		auto command_list = command_queue->GetCommandList();
 
 		std::vector<VertexAttributeDesc> vertex_attributes =
 		{
-			{"POSITION",0,Format::RGB32_FLOAT,0,~0u,false}
+			{"POSITION",0,Format::RGB32_FLOAT,0,0u,false}
 		};
 
 		std::vector<Vertex> vertexs
 		{
-			{ -1.0f, -1.0f, -1.0f },
-			{ -1.0f, +1.0f, -1.0f },
-			{ +1.0f, +1.0f, -1.0f },
+			{ -0.5f, -0.5f, 0.5f },
+			{ -0.5f, +0.5f, 0.5f },
+			{ +0.5f, +0.5f, 0.5f },
 		};
 
 		std::vector<uint16_t> indices
@@ -59,7 +58,7 @@ public:
 		vertex_desc.stride = sizeof(Vertex);
 		vertex_buffer_ = device_->CreateBuffer(vertex_desc);
 		
-		command_list->WriteBuffer(vertex_buffer_, (uint8_t*)vertexs.data(), vertexs.size() * sizeof(Vertex));
+		command_list->WriteBuffer(vertex_buffer_, reinterpret_cast<uint8_t*>(vertexs.data()), vertexs.size() * sizeof(Vertex));
 
 		BufferDesc index_desc;
 		index_desc.format = Format::R16_UINT;
@@ -68,7 +67,7 @@ public:
 		index_desc.stride = sizeof(uint16_t);
 		index_buffer_ = device_->CreateBuffer(index_desc);
 
-		command_list->WriteBuffer(index_buffer_, (uint8_t*)indices.data(), indices.size() * sizeof(uint16_t));
+		command_list->WriteBuffer(index_buffer_, reinterpret_cast<uint8_t*>(indices.data()), indices.size() * sizeof(uint16_t));
 
 		TextureDesc depth_tex_desc;
 		depth_tex_desc.format = Format::D24S8;
@@ -90,22 +89,26 @@ public:
 
 		command_list->ExecuteCommandList();
 
+		command_queue->Flush();
+
 		return true;
 	}
 
 	void OnUpdate(double dt) override
 	{
-		auto command_list = device_->GetCommandList(CommandListType::kDirect);
+		const auto command_list = device_->GetCommandList(CommandListType::kDirect);
 
 		RenderTarget rt = swap_chain_->GetRenderTarget();
 		rt.AttacthAttachment(AttachmentPoint::kDepthStencil, depth_stencil_texture_);
 
 		command_list->SetRenderTarget(rt);
 		command_list->SetViewport(rt.GetViewport());
-		command_list->SetScissorRect({ 0,0,std::numeric_limits<uint32_t>::max(),std::numeric_limits<uint32_t>::max() });
+		command_list->SetScissorRect({ 0,0,std::numeric_limits<int32_t>::max(),std::numeric_limits<int32_t>::max() });
 
-		float clear_color[] = { 1.0, 0.0, 0.0, 1.0 };
+		constexpr float clear_color[] = { 1.0, 0.0, 0.0, 1.0 };
 		command_list->ClearTexture(rt.GetAttachment(AttachmentPoint::kColor0).texture,clear_color);
+
+		command_list->ClearDepthStencilTexture(depth_stencil_texture_, ClearFlags::kClearFlagDepth | ClearFlags::kClearFlagStencil, 1, 0);
 
 		command_list->SetGraphicsPipeline(pso_);
 
@@ -113,7 +116,7 @@ public:
 		command_list->SetVertexBuffer(0, vertex_buffer_);
 		command_list->SetIndexBuffer(index_buffer_);
 
-		command_list->DrawIndexed(3, 0, 0, 0, 0);
+		command_list->DrawIndexed(3, 1, 0, 0, 0);
 
 		command_list->ExecuteCommandList();
 		

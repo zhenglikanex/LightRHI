@@ -11,8 +11,8 @@
 class AutoTimer
 {
 public:
-	AutoTimer(const std::string& name)
-		:name_(name)
+	AutoTimer(std::string name)
+		:name_(std::move(name))
 		, start_(std::chrono::high_resolution_clock::now())
 	{
 		if(!thread_)
@@ -39,7 +39,7 @@ public:
 		Dump("");
 	}
 
-	void Dump(const std::string& desc)
+	void Dump(const std::string& desc) const
 	{
 		auto dt = std::chrono::high_resolution_clock::now() - start_;
 		std::string str = desc + name_ + ":" + std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(dt).count()) + "\n";

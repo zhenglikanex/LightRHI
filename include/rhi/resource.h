@@ -59,7 +59,7 @@ namespace light::rhi
     protected:
         InterfaceType* ptr_;
         template<class U> friend class Handle;
-
+        
         void InternalAddRef() const noexcept
         {
             if (ptr_ != nullptr)

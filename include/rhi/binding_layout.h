@@ -111,7 +111,7 @@ namespace light::rhi
 	public:
 		explicit BindingLayout(uint32_t num_parameters)
 		{
-			parameters_.reserve(num_parameters);
+			parameters_.resize(num_parameters);
 		}
 
 		~BindingLayout() override = default;
@@ -128,10 +128,21 @@ namespace light::rhi
 
 		void Add(uint32_t parameter_index, const BindingParameter& parameter)
 		{
+			if (parameters_.size() <= parameter_index)
+			{
+				parameters_.resize(parameter_index + 1);
+			}
+
 			parameters_[parameter_index] = parameter;
 		}
 
-		const std::vector<BindingParameter>& GetParameters() const { return parameters_; }
+		auto operator[](size_t index) const { return parameters_[index]; }
+
+		size_t Size() const { return parameters_.size(); }
+
+		auto begin() const { return parameters_.begin(); }
+
+		auto end() const { return parameters_.end(); }
 	private:
 		std::vector<BindingParameter> parameters_;
 	};

@@ -53,16 +53,6 @@ namespace light
 	{
 		device_->Flush();
 
-		if(swap_chain_)
-		{
-			swap_chain_.Reset();
-		}
-		
-		if(device_)
-		{
-			device_.Reset();
-		}
-
 		if(window_)
 		{
 			glfwDestroyWindow(window_);

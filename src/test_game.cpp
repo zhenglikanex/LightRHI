@@ -13,6 +13,14 @@ struct Vertex
 	float z;
 };
 
+struct Color
+{
+	float r;
+	float g;
+	float b;
+	float a;
+};
+
 class TestGame final : public Game
 {
 public:
@@ -76,8 +84,19 @@ public:
 
 		depth_stencil_texture_ = device_->CreateTexture(depth_tex_desc);
 
+		BindingParameter parameter1;
+		parameter1.InitAsConstants(4, 0);
+		
+		BindingParameter parameter2;
+		parameter2.InitAsConstantBufferView(1);
+
+		BindingLayout* binding_layout = new BindingLayout(2);
+		binding_layout->Add(0, parameter1);
+		binding_layout->Add(1, parameter2);
+
 		GraphicsPipelineDesc pso_desc;
 		pso_desc.input_layout = device_->CreateInputLayout(std::move(vertex_attributes));
+		pso_desc.binding_layout = BindingLayoutHandle::Create(binding_layout);
 		pso_desc.vs = device_->CreateShader(ShaderType::kVertex, "shaders/color.hlsl", "VS", "vs_5_0");
 		pso_desc.ps = device_->CreateShader(ShaderType::kPixel, "shaders/color.hlsl", "PS", "ps_5_0");
 		pso_desc.primitive_type = PrimitiveTopology::kTriangleList;
@@ -111,6 +130,10 @@ public:
 		command_list->ClearDepthStencilTexture(depth_stencil_texture_, ClearFlags::kClearFlagDepth | ClearFlags::kClearFlagStencil, 1, 0);
 
 		command_list->SetGraphicsPipeline(pso_);
+
+		Color color{ 1.0,0.0,1.0,1.0 };
+		command_list->SetGraphics32BitConstants(0, color);
+		command_list->SetGraphicsDynamicConstantBuffer(1, color);
 
 		command_list->SetPrimitiveTopology(PrimitiveTopology::kTriangleList);
 		command_list->SetVertexBuffer(0, vertex_buffer_);

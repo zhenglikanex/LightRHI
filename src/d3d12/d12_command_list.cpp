@@ -171,7 +171,12 @@ namespace light::rhi
 
 		memcpy(allocation.cpu, data, bytes);
 
-		d3d12_command_list_->SetGraphicsRootConstantBufferView(parameter_index, allocation.gpu);
+		//if (buffer_states_[parameter_index] != allocation.gpu)
+		{
+			d3d12_command_list_->SetGraphicsRootConstantBufferView(parameter_index, allocation.gpu);
+		}
+
+		buffer_states_[parameter_index] = allocation.gpu;
 	}
 
 	void D12CommandList::SetGraphics32BitConstants(uint32_t parameter_index, uint32_t num_constants,
@@ -260,9 +265,9 @@ namespace light::rhi
 
 			d3d12_command_list_->SetGraphicsRootSignature(d12_pso->GetRootSignature());
 			d3d12_command_list_->SetPipelineState(d12_pso->GetNative());
-
-			TrackResource(pso);
 		}
+
+		TrackResource(pso);
 	}
 
 	void D12CommandList::SetPrimitiveTopology(PrimitiveTopology primitive_topology)
@@ -279,7 +284,7 @@ namespace light::rhi
 		auto d12_buffer = CheckedCast<D12Buffer*>(buffer);
 
 		TrackResource(buffer);
-		TransitionBarrier(buffer, ResourceStates::kGenericRead);
+		TransitionBarrier(buffer, ResourceStates::kVertexAndConstantBuffer);
 
 		D3D12_VERTEX_BUFFER_VIEW view{};
 		view.BufferLocation = d12_buffer->GetNative()->GetGPUVirtualAddress();
@@ -298,7 +303,7 @@ namespace light::rhi
 		auto d12_buffer = CheckedCast<D12Buffer*>(buffer);
 
 		TrackResource(buffer);
-		TransitionBarrier(buffer, ResourceStates::kGenericRead);
+		TransitionBarrier(buffer, ResourceStates::kIndexBuffer);
 
 		D3D12_INDEX_BUFFER_VIEW view{};
 		view.BufferLocation = d12_buffer->GetNative()->GetGPUVirtualAddress();

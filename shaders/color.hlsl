@@ -1,3 +1,13 @@
+cbuffer cbConstans : register(b0)
+{
+	float4 gColor; 
+};
+
+cbuffer cbConstansView : register(b1)
+{
+	float4 gColor2;
+};
+
 struct VertexIn
 {
 	float3 PosL  : POSITION;
@@ -19,5 +29,5 @@ VertexOut VS(VertexIn vin)
 
 float4 PS(VertexOut pin) : SV_Target
 {
-    return float4(1.0f,1.0f,0.0f,1.0f);
+    return gColor2;
 }

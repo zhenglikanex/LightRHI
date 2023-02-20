@@ -116,6 +116,7 @@ namespace light::rhi
 		GraphicsPipeline* current_pso_;
 		ID3D12DescriptorHeap* descriptr_heaps_[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES];
 		D3D12_GPU_VIRTUAL_ADDRESS buffer_gpu_virtual_address_[32];
+		D3D12_GPU_VIRTUAL_ADDRESS buffer_states_[32];
 	};
 
 }

@@ -15,18 +15,17 @@ namespace light::rhi
 
 		if(binding_layout != nullptr)
 		{
-			const auto& parameters = binding_layout->GetParameters();
+			
+			num_parameters_ = binding_layout->Size();
 
-			num_parameters_ = parameters.size();
-
-			std::vector<D3D12_ROOT_PARAMETER1> root_parameters(parameters.size());
+			std::vector<D3D12_ROOT_PARAMETER1> root_parameters(binding_layout->Size());
 
 			std::vector<std::vector<D3D12_DESCRIPTOR_RANGE1>> ranges;
-			ranges.reserve(parameters.size());
+			ranges.reserve(binding_layout->Size());
 
-			for (uint32_t i = 0; i < parameters.size(); ++i)
+			for (uint32_t i = 0; i < binding_layout->Size(); ++i)
 			{
-				const auto& in = parameters[i];
+				const auto& in = (*binding_layout)[i];
 				auto& out = root_parameters[i];
 
 				if (in.type == BindingParameterType::kDescriptorTable)

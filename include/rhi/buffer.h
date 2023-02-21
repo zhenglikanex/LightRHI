@@ -14,7 +14,7 @@ namespace light::rhi
 		Format format = Format::UNKNOWN;
 		bool is_uav = false;
 		uint32_t stride = 0;
-		uint32_t byte = 0;
+		uint32_t size_in_bytes = 0;
 
 		std::string debug_name;
 	};

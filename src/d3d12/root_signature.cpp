@@ -15,12 +15,11 @@ namespace light::rhi
 
 		if(binding_layout != nullptr)
 		{
-			
 			num_parameters_ = binding_layout->Size();
 
-			std::vector<D3D12_ROOT_PARAMETER1> root_parameters(binding_layout->Size());
+			std::vector<D3D12_ROOT_PARAMETER> root_parameters(binding_layout->Size());
 
-			std::vector<std::vector<D3D12_DESCRIPTOR_RANGE1>> ranges;
+			std::vector<std::vector<D3D12_DESCRIPTOR_RANGE>> ranges;
 			ranges.reserve(binding_layout->Size());
 
 			for (uint32_t i = 0; i < binding_layout->Size(); ++i)
@@ -32,21 +31,36 @@ namespace light::rhi
 				{
 					auto& descriptor_ranges = ranges.emplace_back(in.descriptor_table.num_descriptor_ranges);
 
+					uint32_t offset = 0;
 					for (uint32_t range_index = 0; range_index < in.descriptor_table.num_descriptor_ranges; ++range_index)
 					{
-						auto& range = descriptor_ranges[range_index];
-						range.RangeType = ConvertDescriptorRangeType(in.descriptor_table.descriptor_ranges[i].range_type);
-						range.NumDescriptors = in.descriptor_table.descriptor_ranges[i].num_descriptors;
-						range.BaseShaderRegister = in.descriptor_table.descriptor_ranges[i].base_shader_register;
-						range.RegisterSpace = in.descriptor_table.descriptor_ranges[i].register_space;
-						range.OffsetInDescriptorsFromTableStart = in.descriptor_table.descriptor_ranges[i].
-							offset_in_descriptors_from_table_start;
+						auto& out_range = descriptor_ranges[range_index];
+						const auto& in_range = in.descriptor_table.descriptor_ranges[range_index];
+						out_range.RangeType = ConvertDescriptorRangeType(in_range.range_type);
+						out_range.NumDescriptors = in_range.num_descriptors;
+						out_range.BaseShaderRegister = in_range.base_shader_register;
+						out_range.RegisterSpace = in_range.register_space;
+						out_range.OffsetInDescriptorsFromTableStart = offset;
+						
+						num_descriptors_per_table_[i] += out_range.NumDescriptors;
+						offset += out_range.NumDescriptors;
 					}
 
 					out.ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 					out.ShaderVisibility = ConvertShaderVisibility(in.shader_visibility);
 					out.DescriptorTable.NumDescriptorRanges = in.descriptor_table.num_descriptor_ranges;
 					out.DescriptorTable.pDescriptorRanges = descriptor_ranges.data();
+				
+
+					if (descriptor_ranges.back().RangeType == D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER)
+					{
+						sampler_table_bit_mask_ |= 1 << i;
+					}
+					else 
+					{
+						descriptor_table_bit_mask_ |= 1 << i;
+					}
+					
 				}
 				else if (in.type == BindingParameterType::kConstants)
 				{
@@ -89,10 +103,11 @@ namespace light::rhi
 			}
 
 			//todo:RootSignature°æ±¾?
-			CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rs_desc{};
-			rs_desc.Init_1_1(root_parameters.size(), root_parameters.data(), 0, nullptr, flag);
-
-			ThrowIfFailed(D3D12SerializeVersionedRootSignature(&rs_desc, &serialized_rs, &error_blob));
+			//CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rs_desc{};
+			CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(root_parameters.size(), root_parameters.data(), 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+			//rs_desc.Init_1_1(root_parameters.size(), root_parameters.data(), 0, nullptr, flag);
+			D3D12SerializeRootSignature(&rootSigDesc, D3D_ROOT_SIGNATURE_VERSION_1, serialized_rs.GetAddressOf(), error_blob.GetAddressOf());
+			//ThrowIfFailed(D3D12SerializeVersionedRootSignature(&rs_desc, &serialized_rs, &error_blob));
 
 			ThrowIfFailed(device_->GetNative()->CreateRootSignature(
 				0,

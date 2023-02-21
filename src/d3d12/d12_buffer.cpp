@@ -8,7 +8,7 @@ namespace light::rhi
 		: Buffer(desc)
 		, device_(device)
 	{
-		D3D12_RESOURCE_DESC d12_desc = CD3DX12_RESOURCE_DESC::Buffer(desc.byte, desc.is_uav ? D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS : D3D12_RESOURCE_FLAG_NONE, 0);
+		D3D12_RESOURCE_DESC d12_desc = CD3DX12_RESOURCE_DESC::Buffer(desc.size_in_bytes, desc.is_uav ? D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS : D3D12_RESOURCE_FLAG_NONE, 0);
 
 		D3D12_HEAP_TYPE heap_type = {};
 
@@ -51,7 +51,7 @@ namespace light::rhi
 		{
 			D3D12_CONSTANT_BUFFER_VIEW_DESC desc{};
 			desc.BufferLocation = resource_->GetGPUVirtualAddress();
-			desc.SizeInBytes = desc_.byte;
+			desc.SizeInBytes = desc_.size_in_bytes;
 
 			device_->GetNative()->CreateConstantBufferView(&desc, cbv_.GetDescriptorHandle());
 		}

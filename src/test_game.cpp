@@ -62,7 +62,7 @@ public:
 		BufferDesc vertex_desc;
 		vertex_desc.type = BufferType::kVertex;
 		vertex_desc.format = Format::RGB32_FLOAT;
-		vertex_desc.byte = sizeof(Vertex) * 3;
+		vertex_desc.size_in_bytes = sizeof(Vertex) * 3;
 		vertex_desc.stride = sizeof(Vertex);
 		vertex_buffer_ = device_->CreateBuffer(vertex_desc);
 		
@@ -71,7 +71,7 @@ public:
 		BufferDesc index_desc;
 		index_desc.format = Format::R16_UINT;
 		index_desc.type = BufferType::kIndex;
-		index_desc.byte = sizeof(uint16_t) * 3;
+		index_desc.size_in_bytes = sizeof(uint16_t) * 3;
 		index_desc.stride = sizeof(uint16_t);
 		index_buffer_ = device_->CreateBuffer(index_desc);
 
@@ -90,9 +90,18 @@ public:
 		BindingParameter parameter2;
 		parameter2.InitAsConstantBufferView(1);
 
+		BindingParameter::DescriptorRange range;
+		range.base_shader_register = 2;
+		range.num_descriptors = 1;
+		range.range_type = DescriptorRangeType::kConstantsBufferView;
+
+		BindingParameter parameter3;
+		parameter2.InitAsDescriptorTable(1, &range);
+
 		BindingLayout* binding_layout = new BindingLayout(2);
 		binding_layout->Add(0, parameter1);
 		binding_layout->Add(1, parameter2);
+		binding_layout->Add(2, parameter3);
 
 		GraphicsPipelineDesc pso_desc;
 		pso_desc.input_layout = device_->CreateInputLayout(std::move(vertex_attributes));
@@ -134,6 +143,15 @@ public:
 		Color color{ 1.0,0.0,1.0,1.0 };
 		command_list->SetGraphics32BitConstants(0, color);
 		command_list->SetGraphicsDynamicConstantBuffer(1, color);
+
+		BufferDesc desc;
+		desc.type = BufferType::kConstant;
+		desc.size_in_bytes = sizeof(Color);
+		desc.format = Format::RGB32_FLOAT;
+
+		BufferHandle buf = device_->CreateBuffer(desc);
+		command_list->WriteBuffer(buf, (uint8_t*)&color, sizeof(Color));
+		command_list->SetConstantBufferView(2,0,buf);
 
 		command_list->SetPrimitiveTopology(PrimitiveTopology::kTriangleList);
 		command_list->SetVertexBuffer(0, vertex_buffer_);

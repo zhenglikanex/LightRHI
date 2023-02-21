@@ -11,11 +11,10 @@ namespace light::rhi
 	{
 		struct DescriptorRange
 		{
-			DescriptorRangeType range_type;
-			uint32_t num_descriptors;
-			uint32_t base_shader_register;
-			uint32_t register_space;
-			uint32_t offset_in_descriptors_from_table_start;
+			DescriptorRangeType range_type = DescriptorRangeType::kConstantsBufferView;
+			uint32_t num_descriptors = 1;
+			uint32_t base_shader_register = 0;
+			uint32_t register_space = 0;
 		};
 		
 		struct DescriptorTable

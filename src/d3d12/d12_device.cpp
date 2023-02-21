@@ -110,7 +110,7 @@ namespace light::rhi
 	{
 		if(desc.type == BufferType::kConstant)
 		{
-			desc.byte = Align(desc.byte, kConstantAlignSize);
+			desc.size_in_bytes = Align(desc.size_in_bytes, kConstantAlignSize);
 		}
 
 		return MakeHandle<D12Buffer>(this,desc);

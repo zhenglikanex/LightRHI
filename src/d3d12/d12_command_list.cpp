@@ -21,12 +21,6 @@ namespace light::rhi
 			nullptr, 
 			IID_PPV_ARGS(&d3d12_command_list_)));
 		
-		static int id = 0;
-
-		std::wstring name = L"D12CommandList" + std::to_wstring(id++);
-
-		d3d12_command_list_->SetName(name.c_str());
-
 		for (size_t i = 0; i < D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES; ++i)
 		{
 			dynamic_descriptor_heaps_[i] = std::make_unique<DynamicDescriptorHeap>(device_, static_cast<D3D12_DESCRIPTOR_HEAP_TYPE>(i));
@@ -210,7 +204,7 @@ namespace light::rhi
 	void D12CommandList::SetStructuredBufferView(uint32_t parameter_index, uint32_t descriptor_offset, Buffer* buffer,
 		uint32_t offset, ResourceStates state_after)
 	{
-		SetStructuredBufferView(parameter_index, descriptor_offset, buffer, offset, buffer->GetDesc().byte, state_after);
+		SetStructuredBufferView(parameter_index, descriptor_offset, buffer, offset, buffer->GetDesc().size_in_bytes, state_after);
 	}
 
 	void D12CommandList::SetStructuredBufferView(uint32_t parameter_index, uint32_t descriptor_offset, Buffer* buffer,
@@ -228,7 +222,7 @@ namespace light::rhi
 	void D12CommandList::SetUnoderedAccessBufferView(uint32_t parameter_index, uint32_t descriptor_offset,
 		Buffer* buffer, uint32_t offset, ResourceStates state_after)
 	{
-		SetUnoderedAccessBufferView(parameter_index, descriptor_offset, buffer, offset, buffer->GetDesc().byte, state_after);
+		SetUnoderedAccessBufferView(parameter_index, descriptor_offset, buffer, offset, buffer->GetDesc().size_in_bytes, state_after);
 	}
 
 	void D12CommandList::SetUnoderedAccessBufferView(uint32_t parameter_index, uint32_t descriptor_offset,
@@ -288,7 +282,7 @@ namespace light::rhi
 
 		D3D12_VERTEX_BUFFER_VIEW view{};
 		view.BufferLocation = d12_buffer->GetNative()->GetGPUVirtualAddress();
-		view.SizeInBytes = desc.byte;
+		view.SizeInBytes = desc.size_in_bytes;
 		view.StrideInBytes = desc.stride;
 
 		d3d12_command_list_->IASetVertexBuffers(slot, 1, &view);
@@ -307,7 +301,7 @@ namespace light::rhi
 
 		D3D12_INDEX_BUFFER_VIEW view{};
 		view.BufferLocation = d12_buffer->GetNative()->GetGPUVirtualAddress();
-		view.SizeInBytes = static_cast<UINT>(desc.byte);
+		view.SizeInBytes = static_cast<UINT>(desc.size_in_bytes);
 		view.Format = GetDxgiFormatMapping(buffer->GetDesc().format).srv_format;
 		d3d12_command_list_->IASetIndexBuffer(&view);
 	}

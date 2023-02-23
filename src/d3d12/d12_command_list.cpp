@@ -257,7 +257,14 @@ namespace light::rhi
 		{
 			auto d12_pso = CheckedCast<D12GraphicsPipeline*>(pso);
 
-			d3d12_command_list_->SetGraphicsRootSignature(d12_pso->GetRootSignature());
+			auto root_sigature = d12_pso->GetRootSignature();
+			d3d12_command_list_->SetGraphicsRootSignature(root_sigature->GetNative());
+			
+			for (auto& dynamic_descriptor_heap : dynamic_descriptor_heaps_)
+			{
+				dynamic_descriptor_heap->ParseRootSignature(root_sigature);
+			}
+
 			d3d12_command_list_->SetPipelineState(d12_pso->GetNative());
 		}
 

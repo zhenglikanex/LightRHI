@@ -16,7 +16,7 @@ namespace light::rhi
 		D12GraphicsPipeline(D12Device* device, const GraphicsPipelineDesc& desc, const RenderTarget& render_target, RootSignature* root_signature);
 
 		ID3D12PipelineState* GetNative() { return pipeline_state_; }
-		ID3D12RootSignature* GetRootSignature() { return root_signature_->GetNative(); }
+		RootSignature* GetRootSignature() { return root_signature_; }
 	private:
 		Handle<ID3D12PipelineState> pipeline_state_;
 		RootSignatureHandle root_signature_;

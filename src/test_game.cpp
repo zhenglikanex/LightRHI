@@ -96,7 +96,7 @@ public:
 		range.range_type = DescriptorRangeType::kConstantsBufferView;
 
 		BindingParameter parameter3;
-		parameter2.InitAsDescriptorTable(1, &range);
+		parameter3.InitAsDescriptorTable(1, &range);
 
 		BindingLayout* binding_layout = new BindingLayout(2);
 		binding_layout->Add(0, parameter1);

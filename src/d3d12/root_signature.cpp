@@ -17,9 +17,9 @@ namespace light::rhi
 		{
 			num_parameters_ = binding_layout->Size();
 
-			std::vector<D3D12_ROOT_PARAMETER> root_parameters(binding_layout->Size());
+			std::vector<D3D12_ROOT_PARAMETER1> root_parameters(binding_layout->Size());
 
-			std::vector<std::vector<D3D12_DESCRIPTOR_RANGE>> ranges;
+			std::vector<std::vector<D3D12_DESCRIPTOR_RANGE1>> ranges;
 			ranges.reserve(binding_layout->Size());
 
 			for (uint32_t i = 0; i < binding_layout->Size(); ++i)
@@ -50,7 +50,6 @@ namespace light::rhi
 					out.ShaderVisibility = ConvertShaderVisibility(in.shader_visibility);
 					out.DescriptorTable.NumDescriptorRanges = in.descriptor_table.num_descriptor_ranges;
 					out.DescriptorTable.pDescriptorRanges = descriptor_ranges.data();
-				
 
 					if (descriptor_ranges.back().RangeType == D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER)
 					{
@@ -103,11 +102,10 @@ namespace light::rhi
 			}
 
 			//todo:RootSignature°æ±¾?
-			//CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rs_desc{};
-			CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(root_parameters.size(), root_parameters.data(), 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
-			//rs_desc.Init_1_1(root_parameters.size(), root_parameters.data(), 0, nullptr, flag);
-			D3D12SerializeRootSignature(&rootSigDesc, D3D_ROOT_SIGNATURE_VERSION_1, serialized_rs.GetAddressOf(), error_blob.GetAddressOf());
-			//ThrowIfFailed(D3D12SerializeVersionedRootSignature(&rs_desc, &serialized_rs, &error_blob));
+			CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rs_desc{};
+			rs_desc.Init_1_1(root_parameters.size(), root_parameters.data(), 0, nullptr, flag);
+
+			ThrowIfFailed(D3D12SerializeVersionedRootSignature(&rs_desc, &serialized_rs, &error_blob));
 
 			ThrowIfFailed(device_->GetNative()->CreateRootSignature(
 				0,
